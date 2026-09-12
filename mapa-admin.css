@@ -1,0 +1,32 @@
+#mapa-admin-contenedor {
+    width: 100%;
+    height: 420px;
+    margin: 16px 0 24px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.marcador-admin {
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.marcador-otro {
+    width: 16px;
+    height: 16px;
+    background: #aaa;
+}
+
+.marcador-actual {
+    width: 22px;
+    height: 22px;
+    background: #2a2a2a;
+    cursor: grab;
+}
+
+.marcador-actual:active {
+    cursor: grabbing;
+}

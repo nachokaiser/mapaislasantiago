@@ -1,0 +1,13 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local by Flywheel / entornos locales
+.vscode/
+.idea/
+
+# Por las dudas: nunca versionar media ni backups si terminan cayendo acá
+uploads/
+*.sql
+*.zip
