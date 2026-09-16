@@ -11,6 +11,7 @@ function mapa_sonoro_scripts() {
         wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
         wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', [], null, true);
         wp_enqueue_script('mapa-sonoro-js', get_stylesheet_directory_uri() . '/mapa-sonoro.js', ['leaflet-js'], null, true);
+        wp_enqueue_script('mapa-circuitos-js', get_stylesheet_directory_uri() . '/mapa-circuitos.js', ['mapa-sonoro-js'], null, true);
         wp_enqueue_style('mapa-sonoro-css', get_stylesheet_directory_uri() . '/mapa-sonoro.css');
 
         // Pasar solo los datos necesarios para los marcadores
@@ -259,6 +260,24 @@ add_action( 'rest_api_init', function () {
     ] );
 } );
 
+// Detalle completo de un punto sonoro, para el feed del circuito. Sin
+// campo de video ni galería: no existen todavía en ACF (solo audio, una
+// imagen y descripción). Cuando se agreguen, extender acá.
+function mapa_sonoro_punto_detalle_para_circuito( $punto_id ) {
+    $audio  = get_field( 'audio', $punto_id );
+    $imagen = get_field( 'imagen_punto', $punto_id );
+
+    return [
+        'id'          => $punto_id,
+        'titulo'      => get_the_title( $punto_id ),
+        'lat'         => (float) get_field( 'latitud', $punto_id ),
+        'lng'         => (float) get_field( 'longitud', $punto_id ),
+        'descripcion' => get_field( 'descripcion-punto', $punto_id ) ?: null,
+        'audio'       => $audio  ? $audio['url']  : null,
+        'imagen'      => $imagen ? $imagen['url'] : null,
+    ];
+}
+
 function mapa_sonoro_rest_circuito( $request ) {
     $id = (int) $request->get_param( 'id' );
 
@@ -280,12 +299,7 @@ function mapa_sonoro_rest_circuito( $request ) {
     $puntos = [];
     foreach ( $puntos_relacion as $punto ) {
         $punto_id = is_object( $punto ) ? $punto->ID : (int) $punto;
-        $puntos[] = [
-            'id'     => $punto_id,
-            'titulo' => get_the_title( $punto_id ),
-            'lat'    => (float) get_field( 'latitud', $punto_id ),
-            'lng'    => (float) get_field( 'longitud', $punto_id ),
-        ];
+        $puntos[] = mapa_sonoro_punto_detalle_para_circuito( $punto_id );
     }
 
     return rest_ensure_response( [

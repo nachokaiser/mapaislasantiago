@@ -19,6 +19,9 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
 - `mapa-admin.css` — Estilos del mapa admin
 - `template-mapa.php` — Template de página personalizado para el mapa
 - `style.css` — Declaración del child theme
+- `mapa-circuitos.js` — Vista de circuito en el mapa público (feed de puntos,
+  navegación, caché en memoria). Depende de `window.MapaSonoroPanel`, que
+  expone `mapa-sonoro.js`
 - `acf-json/` — Field groups de ACF (Local JSON). Los CPT NO viven acá: se
   crean con CPT UI y se guardan en la base de datos de cada entorno
 
@@ -86,6 +89,31 @@ pasa por `WP_Query`, hay que incluir `'orderby' => 'post__in'` o el orden se pie
 
 Nota: `color` viene `null` — el campo `color_circuito` todavía no existe en ACF.
 
+`GET /wp-json/mapa-sonoro/v1/circuito/{id}` también trae, por cada punto,
+su detalle completo (`descripcion`, `audio`, `imagen`) — una sola llamada
+trae todo el circuito. Sin `video` ni galería de imágenes: no existen esos
+campos en ACF todavía (`punto-sonoro` solo tiene `imagen_punto`, una imagen).
+
+### Vista de circuito en el front (`mapa-circuitos.js`)
+
+Al tocar un marcador con `circuito_id`, se abre un feed vertical con todos
+los puntos del circuito numerados y renderizados completos (nada se
+expande/colapsa). El punto tocado queda destacado y el panel scrollea
+hasta él. Navegar a otro punto del mismo circuito (otro marcador, el bloque
+en el panel, o el reproductor de audio) nunca cierra el panel; sí lo hace
+tocar un punto de otro circuito o uno suelto.
+
+- `mapa-sonoro.js` expone `window.MapaSonoroPanel` (mapa, panel, marcadores,
+  `registrarAudio`) para que `mapa-circuitos.js` no duplique esa lógica.
+- La respuesta de cada circuito se cachea en memoria (`const cache = {}`
+  dentro de `mapa-circuitos.js`) — se resetea con cada recarga de página,
+  no persiste entre visitas.
+- Solo un audio suena a la vez en todo el panel (`registrarAudio` pausa
+  cualquier otro al arrancar uno nuevo).
+- Audio con `preload="none"`, imágenes con `loading="lazy"` — el archivo no
+  se descarga hasta que se necesita.
+- Video: no implementado, no existe el campo en ACF todavía.
+
 ## Datos pasados al JS admin (`MapaAdmin`)
 
 ```js
@@ -130,8 +158,7 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 
 - Loader mientras carga el mapa
 - Campo `color_circuito` (color picker) en el field group de circuitos
-- Circuitos en el front (`mapa-sonoro.js`, todavía sin tocar): al tocar un punto
-  que pertenece a un circuito se abre la vista del circuito con su listado
-  numerado y el punto tocado seleccionado; se navega entre puntos del mismo
-  circuito sin cerrar el panel (solo se cierra al tocar un punto de otro
-  circuito o uno suelto); mientras está abierto se dibuja el trazo en el mapa
+- Campo de video y galería de imágenes en `punto-sonoro` (no existen aún)
+- Trazo del circuito dibujado en el mapa mientras la vista está abierta
+- Compartir circuito por URL
+- Filtros por etiquetas

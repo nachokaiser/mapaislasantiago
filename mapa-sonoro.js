@@ -103,6 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 .classList.remove('selected');
             marcadorActivo = null;
         }
+        if (window.MapaCircuitos) {
+            window.MapaCircuitos.salir();
+        }
     }
 
     cerrarBtn.addEventListener('click', cerrarPanel);
@@ -131,9 +134,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Un solo audio sonando a la vez en todo el panel — incluye el feed de
+    // un circuito, donde conviven varios <audio> al mismo tiempo.
+    function registrarAudio(audioEl) {
+        audioEl.addEventListener('play', function () {
+            if (window.audioActual && window.audioActual !== audioEl) {
+                window.audioActual.pause();
+            }
+            window.audioActual = audioEl;
+        });
+    }
+
     async function abrirPanel(id) {
         window.audioActual = null;
-        panelContenido.innerHTML = '<div class="panel-cargando"></div>';
+        panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
         panel.classList.add('activo');
 
         try {
@@ -179,7 +193,9 @@ document.addEventListener("DOMContentLoaded", function () {
         html += '</div>';
 
         panelContenido.innerHTML = html;
-        window.audioActual = document.getElementById('audio-player');
+
+        const audioEl = panelContenido.querySelector('#audio-player');
+        if (audioEl) registrarAudio(audioEl);
 
         const btnCompartir = panelContenido.querySelector('.btn-compartir');
         if (btnCompartir) {
@@ -204,6 +220,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let marcadorActivo = null;
+    const markersById = {};
+
+    function seleccionarMarcador(puntoId) {
+        const marker = markersById[puntoId];
+
+        if (marcadorActivo && marcadorActivo !== marker) {
+            const elPrevio = marcadorActivo.getElement();
+            if (elPrevio) {
+                elPrevio.querySelector('.marcador-sonoro').classList.remove('selected');
+            }
+        }
+
+        if (marker) {
+            const el = marker.getElement();
+            if (el) el.querySelector('.marcador-sonoro').classList.add('selected');
+            marcadorActivo = marker;
+        }
+    }
 
     MapaSonoro.puntos.forEach(function (punto) {
         if (!punto.lat || !punto.lng) return;
@@ -212,19 +246,18 @@ document.addEventListener("DOMContentLoaded", function () {
             icon: crearIcono()
         }).addTo(map);
 
-        marker.on('click', function () {
-            // Deseleccionar el anterior
-            if (marcadorActivo) {
-                marcadorActivo.getElement()
-                    .querySelector('.marcador-sonoro')
-                    .classList.remove('selected');
-            }
-            // Seleccionar este
-            marker.getElement()
-                .querySelector('.marcador-sonoro')
-                .classList.add('selected');
-            marcadorActivo = marker;
+        markersById[punto.id] = marker;
 
+        marker.on('click', function () {
+            // Punto que pertenece a un circuito: la vista de circuito se
+            // encarga de todo (destacado, centrado, cierre/apertura).
+            if (punto.circuito_id && window.MapaCircuitos) {
+                window.MapaCircuitos.abrir(punto.circuito_id, punto.id);
+                return;
+            }
+
+            if (window.MapaCircuitos) window.MapaCircuitos.salir();
+            seleccionarMarcador(punto.id);
             centrarConOffset({ lat: punto.lat, lng: punto.lng });
             abrirPanel(punto.id);
         });
@@ -235,4 +268,14 @@ document.addEventListener("DOMContentLoaded", function () {
             cerrarPanel();
         }
     });
+
+    // API compartida con mapa-circuitos.js: mapa, panel, marcadores y audio.
+    window.MapaSonoroPanel = {
+        panel:             panel,
+        panelContenido:    panelContenido,
+        panelTituloSticky: panelTituloSticky,
+        centrarConOffset:  centrarConOffset,
+        seleccionarMarcador: seleccionarMarcador,
+        registrarAudio:    registrarAudio
+    };
 });
