@@ -31,12 +31,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderizar(data) {
         let html = '<div class="circuito-detalle">';
 
-        html += '<div class="circuito-header">';
-        html += '<h2 class="circuito-titulo">' + data.titulo + '</h2>';
+        // El título ya se muestra en la barra sticky del panel (arriba de
+        // todo); acá solo va la descripción, si hay.
         if (data.descripcion) {
+            html += '<div class="circuito-header">';
             html += '<p class="circuito-descripcion">' + data.descripcion + '</p>';
+            html += '</div>';
         }
-        html += '</div>';
 
         html += '<div class="circuito-puntos">';
         data.puntos.forEach(function (punto, i) {
