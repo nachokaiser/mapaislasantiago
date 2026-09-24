@@ -167,11 +167,13 @@
 
 /* MARCADOR */
 .marcador-sonoro {
-    width: 24px;
-    height: 24px;
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: #2a2a2a;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    background: #f7f7f5;
+    border: 3px solid #3a3a3a;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     position: relative;
     cursor: pointer;
     transition: transform 0.15s, background 0.15s;
@@ -191,15 +193,16 @@
 
 .marcador-sonoro.selected {
     background: #FE4735;
+    border-color: #3a3a3a;
 }
 
 .marcador-sonoro.selected::before {
-    width: 44px; height: 44px;
+    width: 34px; height: 34px;
     border-color: rgba(254, 71, 53, 0.5);
     animation: onda 2s ease-out infinite;
 }
 .marcador-sonoro.selected::after {
-    width: 66px; height: 66px;
+    width: 50px; height: 50px;
     border-color: rgba(254, 71, 53, 0.5);
     animation: onda 2s ease-out infinite 0.6s;
 }
@@ -260,8 +263,8 @@
     }
 
     #mapa-panel.activo {
-        width: 340px;
-        min-width: 340px;
+        width: 450px;
+        min-width: 450px;
         opacity: 1;
         transition: width 0.3s ease, min-width 0.3s ease, opacity 0.25s ease 0.2s;
     }

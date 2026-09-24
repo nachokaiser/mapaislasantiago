@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.audioActual) {
             window.audioActual.pause();
         }
+        detenerVideoActivo();
         if (marcadorActivo) {
             marcadorActivo.getElement()
                 .querySelector('.marcador-sonoro')
@@ -109,6 +110,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     cerrarBtn.addEventListener('click', cerrarPanel);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('activo')) {
+            cerrarPanel();
+        }
+    });
 
     function centrarConOffset(latlng) {
         const esDesktop = window.innerWidth > 720;
@@ -134,15 +141,48 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Un solo audio sonando a la vez en todo el panel — incluye el feed de
-    // un circuito, donde conviven varios <audio> al mismo tiempo.
+    // Corta el video que esté reproduciéndose. Un <video> se pausa; un
+    // embed de YouTube/Vimeo no se puede pausar desde afuera (es otro
+    // origen), así que se saca del DOM — que es lo que lo detiene.
+    function detenerVideoActivo() {
+        if (!window.videoActivo) return;
+
+        if (window.videoActivo.tagName === 'VIDEO') {
+            window.videoActivo.pause();
+        } else {
+            window.videoActivo.remove();
+        }
+
+        window.videoActivo = null;
+    }
+
+    // Un solo medio sonando a la vez en todo el panel: arrancar un audio
+    // corta cualquier otro audio y también cualquier video.
     function registrarAudio(audioEl) {
         audioEl.addEventListener('play', function () {
             if (window.audioActual && window.audioActual !== audioEl) {
                 window.audioActual.pause();
             }
+            detenerVideoActivo();
             window.audioActual = audioEl;
         });
+    }
+
+    // Arranca el medio del punto recién seleccionado. Si tiene audio, gana
+    // el audio; si no, se activa el video. El play() puede ser rechazado
+    // por la política de autoplay del navegador — se ignora en silencio,
+    // el usuario siempre tiene los controles a mano.
+    function reproducirMedio(audioEl, videoEl) {
+        if (audioEl) {
+            const intento = audioEl.play();
+            if (intento && intento.catch) intento.catch(function () {});
+            return;
+        }
+
+        if (videoEl) {
+            const boton = videoEl.querySelector('.video-play');
+            if (boton) boton.click();
+        }
     }
 
     // Detecta YouTube/Vimeo en una URL y arma el src de embed. Para YouTube
@@ -201,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         boton.addEventListener('click', function () {
             if (window.audioActual) window.audioActual.pause();
+            detenerVideoActivo();
 
             let media = null;
 
@@ -221,11 +262,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 media.className = 'punto-video-player';
                 el.innerHTML = '';
                 el.appendChild(media);
+                window.videoActivo = media;
             }
         });
     }
 
     async function abrirPanel(id) {
+        detenerVideoActivo();
         window.audioActual = null;
         panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
         panel.classList.add('activo');
@@ -282,6 +325,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const videoEl = panelContenido.querySelector('.punto-video');
         if (videoEl) activarVideo(videoEl, data.video);
 
+        reproducirMedio(audioEl, videoEl);
+
         const btnCompartir = panelContenido.querySelector('.btn-compartir');
         if (btnCompartir) {
             btnCompartir.addEventListener('click', function () {
@@ -299,8 +344,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return L.divIcon({
             html: '<div class="marcador-sonoro"></div>',
             className: '',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
         });
     }
 
@@ -363,6 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
         seleccionarMarcador: seleccionarMarcador,
         registrarAudio:      registrarAudio,
         crearBloqueVideo:    crearBloqueVideo,
-        activarVideo:        activarVideo
+        activarVideo:        activarVideo,
+        reproducirMedio:     reproducirMedio
     };
 });

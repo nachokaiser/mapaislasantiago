@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         panelApi.panelContenido.querySelectorAll('audio[data-punto-id]').forEach(function (audioEl) {
             panelApi.registrarAudio(audioEl);
             audioEl.addEventListener('play', function () {
-                seleccionarPunto(Number(audioEl.dataset.puntoId));
+                seleccionarPunto(Number(audioEl.dataset.puntoId), false);
             });
         });
 
@@ -66,19 +66,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const boton = videoEl.querySelector('.video-play');
             if (boton) {
                 boton.addEventListener('click', function () {
-                    seleccionarPunto(puntoId);
+                    seleccionarPunto(puntoId, false);
                 });
             }
         });
 
         panelApi.panelContenido.querySelectorAll('.punto-circuito-item').forEach(function (item) {
-            item.addEventListener('click', function () {
+            item.addEventListener('click', function (e) {
+                // Los controles del audio y del video ya tienen su propio
+                // manejo; sin esto, el click burbujea hasta acá y, por
+                // ejemplo, pausar un audio lo volvería a arrancar.
+                if (e.target.closest('audio, .punto-video')) return;
                 seleccionarPunto(Number(item.dataset.puntoId));
             });
         });
     }
 
-    function seleccionarPunto(puntoId) {
+    // `reproducir` va en false cuando el usuario ya arrancó un medio a mano
+    // (tocó play en el audio o en el video): ahí solo queremos el destacado
+    // y el centrado, no volver a decidir qué se reproduce.
+    function seleccionarPunto(puntoId, reproducir) {
         const data = cache[circuitoActual];
         if (!data) return;
 
@@ -98,6 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (punto.lat && punto.lng) {
             panelApi.centrarConOffset({ lat: punto.lat, lng: punto.lng });
+        }
+
+        if (reproducir !== false) {
+            panelApi.reproducirMedio(
+                panelApi.panelContenido.querySelector('audio[data-punto-id="' + puntoId + '"]'),
+                panelApi.panelContenido.querySelector('.punto-video[data-punto-id="' + puntoId + '"]')
+            );
         }
     }
 

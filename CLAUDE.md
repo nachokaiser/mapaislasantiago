@@ -136,16 +136,25 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Centro: `-34.834911, -57.901543`, zoom 14, minZoom 12/13, maxZoom 18
 - `maxBounds` limitado a la isla
 - Tile: `https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png`
-- Marcadores con `L.divIcon` (`.marcador-sonoro`)
+- Marcadores con `L.divIcon` (`.marcador-sonoro`): 18px, relleno casi blanco
+  con stroke oscuro. El tamaño está en dos lados y tiene que coincidir — el
+  CSS y el `iconSize`/`iconAnchor` del `divIcon`, o el punto queda corrido
+  respecto a su coordenada
 - Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
-- Desktop (>720px): side panel derecho con animación ancho + fade
+- Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo
 - Marcador activo: animación ripple con `::before`/`::after` (keyframe `onda`)
-- Click en fondo del mapa (desktop): cierra panel
+- Click en fondo del mapa (desktop) o tecla Esc: cierra panel
+- Al seleccionar un punto arranca solo su medio (`reproducirMedio`): si tiene
+  audio gana el audio, si no se activa el video. Suena un solo medio a la vez
+  en todo el panel — arrancar un audio corta cualquier video y viceversa
 - Recorridos como `L.polyline`, toggle via botón `#toggle-recorridos`
 
 ## Mapa admin — comportamiento
 
+- Usa los mismos tiles de OpenStreetMap.de que el mapa público. Antes usaba
+  CARTO, que pasó a exigir API key (Leaflet nunca pide key: la pide el
+  proveedor de tiles)
 - Click en el mapa coloca/mueve el marcador del punto actual
 - Marcador es draggable
 - Al soltar o clickear, actualiza los campos ACF `latitud` y `longitud`
