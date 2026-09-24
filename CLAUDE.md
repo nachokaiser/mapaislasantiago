@@ -179,7 +179,3 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Trazo del circuito dibujado en el mapa mientras la vista está abierta
 - Compartir circuito por URL
 - Filtros por etiquetas
-- Sacar de `functions.php` el bloque "TEMPORAL: migrar videos mal cargados
-  en el campo Audio" una vez que se corra en producción (Herramientas →
-  "Migrar videos (temporal)") y se confirme que salió bien. No debe quedar
-  una herramienta que reescribe contenido colgada permanentemente
