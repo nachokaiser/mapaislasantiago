@@ -30,6 +30,9 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
 Campos ACF:
 - `latitud`, `longitud` — Number (coordenadas)
 - `audio` — File (URL de audio)
+- `video` — File (video subido)
+- `video_embed` — URL (link de YouTube/Vimeo). Un punto puede tener archivo,
+  link embebido, ambos o ninguno; si hay ambos, el archivo subido gana
 - `imagen_punto` — Image
 - `descripcion-punto` — Textarea
 - Taxonomías propias del CPT (fauna / flora / humano / etc.)
@@ -78,7 +81,8 @@ MapaSonoro.restUrlCircuito // base URL del endpoint REST de circuito
 El manifest se mantiene liviano: solo lo necesario para dibujar marcadores y
 saber a qué circuito pertenece cada uno. El detalle se carga on-demand vía REST:
 
-`GET /wp-json/mapa-sonoro/v1/punto/{id}` → `{ titulo, audio, imagen, descripcion, categorias, url }`
+`GET /wp-json/mapa-sonoro/v1/punto/{id}` → `{ titulo, audio, video, imagen, descripcion, categorias, url }`
+donde `video` es `{ archivo, embed }` (ambos `null` si no hay nada cargado).
 
 `GET /wp-json/mapa-sonoro/v1/circuito/{id}` → `{ id, titulo, descripcion, color, trazo, puntos }`
 donde `puntos` respeta el orden de `puntos_del_circuito` y cada uno trae
@@ -90,9 +94,9 @@ pasa por `WP_Query`, hay que incluir `'orderby' => 'post__in'` o el orden se pie
 Nota: `color` viene `null` — el campo `color_circuito` todavía no existe en ACF.
 
 `GET /wp-json/mapa-sonoro/v1/circuito/{id}` también trae, por cada punto,
-su detalle completo (`descripcion`, `audio`, `imagen`) — una sola llamada
-trae todo el circuito. Sin `video` ni galería de imágenes: no existen esos
-campos en ACF todavía (`punto-sonoro` solo tiene `imagen_punto`, una imagen).
+su detalle completo (`descripcion`, `audio`, `video`, `imagen`) — una sola
+llamada trae todo el circuito. Sin galería de imágenes: `punto-sonoro` solo
+tiene `imagen_punto`, una imagen.
 
 ### Vista de circuito en el front (`mapa-circuitos.js`)
 
@@ -109,10 +113,14 @@ tocar un punto de otro circuito o uno suelto.
   dentro de `mapa-circuitos.js`) — se resetea con cada recarga de página,
   no persiste entre visitas.
 - Solo un audio suena a la vez en todo el panel (`registrarAudio` pausa
-  cualquier otro al arrancar uno nuevo).
+  cualquier otro al arrancar uno nuevo, y activar un video también lo pausa).
 - Audio con `preload="none"`, imágenes con `loading="lazy"` — el archivo no
   se descarga hasta que se necesita.
-- Video: no implementado, no existe el campo en ACF todavía.
+- Video: placeholder con botón de play, nada de `<video>`/`<iframe>` hasta
+  que se activa (`crearBloqueVideo` / `activarVideo`, en `mapa-sonoro.js`).
+  YouTube muestra una miniatura real (URL pública predecible); Vimeo no
+  (implicaría una llamada a su API por video) — placeholder genérico.
+  Si hay archivo subido y link embebido a la vez, gana el archivo.
 
 ## Datos pasados al JS admin (`MapaAdmin`)
 
@@ -158,7 +166,11 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 
 - Loader mientras carga el mapa
 - Campo `color_circuito` (color picker) en el field group de circuitos
-- Campo de video y galería de imágenes en `punto-sonoro` (no existen aún)
+- Galería de imágenes en `punto-sonoro` (hoy solo `imagen_punto`, una imagen)
 - Trazo del circuito dibujado en el mapa mientras la vista está abierta
 - Compartir circuito por URL
 - Filtros por etiquetas
+- Sacar de `functions.php` el bloque "TEMPORAL: migrar videos mal cargados
+  en el campo Audio" una vez que se corra en producción (Herramientas →
+  "Migrar videos (temporal)") y se confirme que salió bien. No debe quedar
+  una herramienta que reescribe contenido colgada permanentemente

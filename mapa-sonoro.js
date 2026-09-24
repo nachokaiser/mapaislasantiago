@@ -145,6 +145,86 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Detecta YouTube/Vimeo en una URL y arma el src de embed. Para YouTube
+    // también devuelve una miniatura real (URL pública y predecible). Para
+    // Vimeo no: conseguirla implica una llamada a su API por cada video, y
+    // por ahora no vale la pena — queda con el placeholder genérico.
+    function parsearVideoEmbed(url) {
+        if (!url) return null;
+
+        const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+        if (youtube) {
+            return {
+                embedSrc:  'https://www.youtube.com/embed/' + youtube[1] + '?autoplay=1',
+                thumbnail: 'https://img.youtube.com/vi/' + youtube[1] + '/hqdefault.jpg'
+            };
+        }
+
+        const vimeo = url.match(/vimeo\.com\/(\d+)/);
+        if (vimeo) {
+            return {
+                embedSrc:  'https://player.vimeo.com/video/' + vimeo[1] + '?autoplay=1',
+                thumbnail: null
+            };
+        }
+
+        return null;
+    }
+
+    // Bloque de video con placeholder: nada de <video> ni <iframe> hasta que
+    // se toca play. `puntoId` es opcional — solo hace falta cuando conviven
+    // varios puntos en un mismo contenedor (el feed de un circuito).
+    function crearBloqueVideo(video, alt, puntoId) {
+        if (!video || (!video.archivo && !video.embed)) return '';
+
+        const embed     = video.embed ? parsearVideoEmbed(video.embed) : null;
+        const thumbnail = embed && embed.thumbnail
+            ? ' style="background-image:url(\'' + embed.thumbnail + '\')"'
+            : '';
+        const atributoPunto = puntoId ? ' data-punto-id="' + puntoId + '"' : '';
+
+        let html = '<div class="punto-video"' + atributoPunto + '>';
+        html += '<div class="video-placeholder"' + thumbnail + '>';
+        html += '<button type="button" class="video-play" aria-label="Reproducir video de ' + alt + '">';
+        html += '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        html += '</button></div></div>';
+        return html;
+    }
+
+    // Cablea el click de play de un bloque de video ya insertado en el DOM.
+    // El archivo subido tiene prioridad sobre el link embebido si hay ambos.
+    function activarVideo(el, video) {
+        if (!video) return;
+
+        const boton = el.querySelector('.video-play');
+        if (!boton) return;
+
+        boton.addEventListener('click', function () {
+            if (window.audioActual) window.audioActual.pause();
+
+            let media = null;
+
+            if (video.archivo) {
+                media = document.createElement('video');
+                media.controls  = true;
+                media.autoplay  = true;
+                media.src       = video.archivo;
+            } else if (video.embed) {
+                const embed = parsearVideoEmbed(video.embed);
+                media = document.createElement('iframe');
+                media.src = embed ? embed.embedSrc : video.embed;
+                media.setAttribute('allow', 'autoplay; fullscreen');
+                media.setAttribute('allowfullscreen', '');
+            }
+
+            if (media) {
+                media.className = 'punto-video-player';
+                el.innerHTML = '';
+                el.appendChild(media);
+            }
+        });
+    }
+
     async function abrirPanel(id) {
         window.audioActual = null;
         panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
@@ -167,6 +247,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.audio) {
             html += '<audio id="audio-player" class="punto-audio" controls src="' + data.audio + '"></audio>';
         }
+
+        html += crearBloqueVideo(data.video, data.titulo);
 
         if (data.imagen) {
             html += '<img class="punto-imagen" src="' + data.imagen + '" alt="' + data.titulo + '">';
@@ -196,6 +278,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const audioEl = panelContenido.querySelector('#audio-player');
         if (audioEl) registrarAudio(audioEl);
+
+        const videoEl = panelContenido.querySelector('.punto-video');
+        if (videoEl) activarVideo(videoEl, data.video);
 
         const btnCompartir = panelContenido.querySelector('.btn-compartir');
         if (btnCompartir) {
@@ -269,13 +354,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // API compartida con mapa-circuitos.js: mapa, panel, marcadores y audio.
+    // API compartida con mapa-circuitos.js: mapa, panel, marcadores, audio y video.
     window.MapaSonoroPanel = {
-        panel:             panel,
-        panelContenido:    panelContenido,
-        panelTituloSticky: panelTituloSticky,
-        centrarConOffset:  centrarConOffset,
+        panel:               panel,
+        panelContenido:      panelContenido,
+        panelTituloSticky:   panelTituloSticky,
+        centrarConOffset:    centrarConOffset,
         seleccionarMarcador: seleccionarMarcador,
-        registrarAudio:    registrarAudio
+        registrarAudio:      registrarAudio,
+        crearBloqueVideo:    crearBloqueVideo,
+        activarVideo:        activarVideo
     };
 });

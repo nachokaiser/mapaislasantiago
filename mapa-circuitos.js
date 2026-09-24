@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
             html += '<audio class="punto-audio" controls preload="none" src="' + punto.audio + '" data-punto-id="' + punto.id + '"></audio>';
         }
 
+        html += panelApi.crearBloqueVideo(punto.video, punto.titulo, punto.id);
+
         if (punto.imagen) {
             html += '<img class="punto-imagen" src="' + punto.imagen + '" alt="' + punto.titulo + '" loading="lazy">';
         }
@@ -52,6 +54,21 @@ document.addEventListener('DOMContentLoaded', function () {
             audioEl.addEventListener('play', function () {
                 seleccionarPunto(Number(audioEl.dataset.puntoId));
             });
+        });
+
+        panelApi.panelContenido.querySelectorAll('.punto-video[data-punto-id]').forEach(function (videoEl) {
+            const puntoId = Number(videoEl.dataset.puntoId);
+            const punto   = data.puntos.find(function (p) { return p.id === puntoId; });
+            if (!punto) return;
+
+            panelApi.activarVideo(videoEl, punto.video);
+
+            const boton = videoEl.querySelector('.video-play');
+            if (boton) {
+                boton.addEventListener('click', function () {
+                    seleccionarPunto(puntoId);
+                });
+            }
         });
 
         panelApi.panelContenido.querySelectorAll('.punto-circuito-item').forEach(function (item) {

@@ -111,6 +111,18 @@ add_action( 'rest_api_init', function () {
     ] );
 } );
 
+// Video de un punto: puede ser un archivo subido, un link embebido
+// (YouTube/Vimeo), los dos, o ninguno. El front decide qué mostrar.
+function mapa_sonoro_extraer_video( $punto_id ) {
+    $archivo = get_field( 'video', $punto_id );
+    $embed   = get_field( 'video_embed', $punto_id );
+
+    return [
+        'archivo' => $archivo ? $archivo['url'] : null,
+        'embed'   => $embed ?: null,
+    ];
+}
+
 function mapa_sonoro_rest_punto( $request ) {
     $id = (int) $request->get_param( 'id' );
 
@@ -135,6 +147,7 @@ function mapa_sonoro_rest_punto( $request ) {
     return rest_ensure_response( [
         'titulo'      => get_the_title( $id ),
         'audio'       => $audio  ? $audio['url']  : null,
+        'video'       => mapa_sonoro_extraer_video( $id ),
         'imagen'      => $imagen ? $imagen['url'] : null,
         'descripcion' => get_field( 'descripcion-punto', $id ) ?: null,
         'categorias'  => $categorias,
@@ -274,6 +287,7 @@ function mapa_sonoro_punto_detalle_para_circuito( $punto_id ) {
         'lng'         => (float) get_field( 'longitud', $punto_id ),
         'descripcion' => get_field( 'descripcion-punto', $punto_id ) ?: null,
         'audio'       => $audio  ? $audio['url']  : null,
+        'video'       => mapa_sonoro_extraer_video( $punto_id ),
         'imagen'      => $imagen ? $imagen['url'] : null,
     ];
 }
@@ -311,3 +325,108 @@ function mapa_sonoro_rest_circuito( $request ) {
         'puntos'      => $puntos,
     ] );
 }
+
+
+// ============================================================
+// TEMPORAL: migrar videos mal cargados en el campo Audio
+//
+// Antes de que existieran los campos de video, algunos videos se subieron
+// al campo Audio como changuito. Esta herramienta detecta esos casos por
+// el tipo real del archivo (no por nombre) y mueve la referencia al campo
+// Video — no borra ni duplica ningún archivo.
+//
+// Correr una sola vez en producción (Herramientas → "Migrar videos
+// (temporal)") y después BORRAR este bloque completo en un commit aparte.
+// ============================================================
+
+define( 'MAPA_SONORO_KEY_AUDIO', 'field_69f9f69af216c' );
+define( 'MAPA_SONORO_KEY_VIDEO_ARCHIVO', 'field_6ab5956897a12' );
+
+function mapa_sonoro_detectar_videos_en_audio() {
+    $puntos    = get_posts( [ 'post_type' => 'punto-sonoro', 'numberposts' => -1 ] );
+    $afectados = [];
+
+    foreach ( $puntos as $punto ) {
+        $audio = get_field( 'audio', $punto->ID );
+        if ( ! $audio || empty( $audio['id'] ) ) continue;
+
+        $mime = get_post_mime_type( $audio['id'] );
+        if ( $mime && strpos( $mime, 'video/' ) === 0 ) {
+            $afectados[] = [
+                'id'      => $punto->ID,
+                'titulo'  => get_the_title( $punto->ID ),
+                'archivo' => $audio['filename'] ?? basename( $audio['url'] ),
+                'mime'    => $mime,
+            ];
+        }
+    }
+
+    return $afectados;
+}
+
+add_action( 'admin_menu', function () {
+    add_management_page(
+        'Migrar videos (temporal)',
+        'Migrar videos (temporal)',
+        'manage_options',
+        'mapa-sonoro-migrar-video',
+        'mapa_sonoro_migrar_video_pagina'
+    );
+} );
+
+function mapa_sonoro_migrar_video_pagina() {
+    if ( ! current_user_can( 'manage_options' ) ) return;
+
+    echo '<div class="wrap"><h1>Migrar videos mal cargados en el campo Audio</h1>';
+
+    if ( ! empty( $_GET['migrado'] ) ) {
+        $resultado = get_transient( 'mapa_sonoro_migrar_video_resultado' );
+        if ( is_array( $resultado ) ) {
+            echo '<div class="notice notice-success"><p>Se migraron ' . count( $resultado ) . ' punto(s): ' . esc_html( implode( ', ', $resultado ) ) . '</p></div>';
+        }
+    }
+
+    $afectados = mapa_sonoro_detectar_videos_en_audio();
+
+    if ( empty( $afectados ) ) {
+        echo '<p>No se encontró ningún punto con un archivo de video en el campo Audio. Nada para migrar.</p></div>';
+        return;
+    }
+
+    echo '<p>Se encontraron ' . count( $afectados ) . ' punto(s) con un archivo de video cargado en el campo Audio (en vez de Video):</p>';
+    echo '<table class="widefat"><thead><tr><th>ID</th><th>Título</th><th>Archivo</th><th>Tipo</th></tr></thead><tbody>';
+    foreach ( $afectados as $a ) {
+        echo '<tr><td>' . esc_html( $a['id'] ) . '</td><td><a href="' . esc_url( get_edit_post_link( $a['id'] ) ) . '" target="_blank">' . esc_html( $a['titulo'] ) . '</a></td><td>' . esc_html( $a['archivo'] ) . '</td><td>' . esc_html( $a['mime'] ) . '</td></tr>';
+    }
+    echo '</tbody></table>';
+
+    echo '<p>Al confirmar, para cada punto de esta lista se va a: copiar el archivo del campo <strong>Audio</strong> al campo <strong>Video (archivo)</strong>, y vaciar el campo Audio. Ningún archivo se borra, solo se corrige a qué campo apunta.</p>';
+
+    echo '<form method="post">';
+    wp_nonce_field( 'mapa_sonoro_migrar_video', 'mapa_sonoro_migrar_video_nonce' );
+    echo '<input type="hidden" name="mapa_sonoro_migrar_video_confirmar" value="1">';
+    submit_button( 'Migrar ahora (' . count( $afectados ) . ' puntos)' );
+    echo '</form></div>';
+}
+
+add_action( 'admin_init', function () {
+    if ( empty( $_POST['mapa_sonoro_migrar_video_confirmar'] ) ) return;
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    if ( ! isset( $_POST['mapa_sonoro_migrar_video_nonce'] ) || ! wp_verify_nonce( $_POST['mapa_sonoro_migrar_video_nonce'], 'mapa_sonoro_migrar_video' ) ) return;
+
+    $afectados = mapa_sonoro_detectar_videos_en_audio();
+    $movidos   = [];
+
+    foreach ( $afectados as $a ) {
+        $audio = get_field( 'audio', $a['id'] );
+        if ( ! $audio || empty( $audio['id'] ) ) continue;
+
+        update_field( MAPA_SONORO_KEY_VIDEO_ARCHIVO, $audio['id'], $a['id'] );
+        update_field( MAPA_SONORO_KEY_AUDIO, null, $a['id'] );
+        $movidos[] = $a['id'];
+    }
+
+    set_transient( 'mapa_sonoro_migrar_video_resultado', $movidos, 60 );
+    wp_safe_redirect( add_query_arg( 'migrado', '1', wp_get_referer() ) );
+    exit;
+} );
