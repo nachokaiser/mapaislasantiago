@@ -9,8 +9,9 @@ document.addEventListener('DOMContentLoaded', function () {
         maxZoom: 18,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+    // Mismos tiles que el mapa público: CARTO pasó a pedir API key.
+    L.tileLayer('https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxNativeZoom: 18,
         maxZoom: 18,
     }).addTo(map);
