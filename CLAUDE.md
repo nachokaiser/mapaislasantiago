@@ -107,12 +107,31 @@ desfasado al abrir un circuito.
 ### Vista de circuito en el front (`mapa-circuitos.js`)
 
 Al tocar un marcador con `circuito_id`, se abre un feed vertical con todos
-los puntos del circuito numerados y renderizados completos (nada se
-expande/colapsa). El punto tocado queda destacado y el panel scrollea
-hasta él. Navegar a otro punto del mismo circuito (otro marcador, el bloque
-en el panel, o el reproductor de audio) nunca cierra el panel; sí lo hace
-tocar un punto de otro circuito o uno suelto.
+los puntos del circuito renderizados completos (nada se expande/colapsa;
+sin números — ver abajo). El punto tocado queda destacado y el panel
+scrollea hasta él. Navegar a otro punto del mismo circuito (otro marcador,
+el bloque en el panel, o el reproductor de audio) nunca cierra el panel;
+sí lo hace tocar un punto de otro circuito o uno suelto.
 
+- El título del panel lleva un eyebrow "Circuito" arriba (`.panel-eyebrow`,
+  solo cuando el panel muestra un circuito, no en un punto suelto).
+- Los puntos ya no muestran su número en el front (`data-orden` lo guarda
+  igual por si hace falta después) — el orden real sigue viniendo del
+  backend en `data.puntos`. Cada punto es un bullet (`.punto-circuito-numero`,
+  10px gris `#B0B0B0` / 16px `#FE4734` cuando está seleccionado, vía
+  `transform: scale()` para no correr el centro entre estados) + título
+  (mismo acento cuando seleccionado, gris `#4b5563` si no).
+- Una línea (`.circuito-linea`, mismo gris que los bullets) atraviesa todos
+  los puntos del feed, del primero al último. La dibuja
+  `dibujarLineaCircuito()` en JS porque el alto entre un punto y el
+  siguiente depende del contenido real (variable) — no hay forma de
+  calcularlo en CSS puro. El `left` SÍ queda fijo en CSS (no medido): está
+  derivado del padding y ancho del bullet, ver el comentario en
+  `.circuito-linea` si esos valores cambian. Se recalcula cuando el panel
+  termina de animarse (si estaba cerrado), igual que el scroll.
+- Capas del feed (de atrás para adelante): fondo del hover (`::before`,
+  z-index 0) → línea (z-index 1) → bullet y contenido (z-index 2). Así el
+  hover no tapa la línea, y la línea pasa "por detrás" de los bullets.
 - `mapa-sonoro.js` expone `window.MapaSonoroPanel` (mapa, panel, marcadores,
   `registrarAudio`) para que `mapa-circuitos.js` no duplique esa lógica.
 - La respuesta de cada circuito se cachea en memoria (`const cache = {}`
@@ -180,6 +199,10 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
 - Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo
+- Fondo de `#panel-contenido` (no de `#mapa-panel`): textura de papel
+  tileable (`assets/paper-texture.png`, CC0, Rice Paper 2 de Subtle
+  Patterns) con `background-attachment: local` — sin ese valor el fondo
+  queda pegado al contenedor visible en vez de moverse con el scroll
 - Marcador activo: animación ripple con `::before`/`::after` (keyframe `onda`)
 - Click en fondo del mapa (desktop) o tecla Esc: cierra panel
 - Al seleccionar un punto arranca solo su medio (`reproducirMedio`): si tiene

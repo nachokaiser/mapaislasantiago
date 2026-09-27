@@ -7,8 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let circuitoActual = null;
 
     function renderizarPuntoCircuito(punto, numero) {
-        let html = '<div class="punto-circuito-item" data-punto-id="' + punto.id + '">';
-        html += '<div class="punto-circuito-numero">' + numero + '</div>';
+        // El número ya no se muestra (solo el punto/bullet) — el orden real
+        // sigue viniendo del backend en `data.puntos`, `numero` queda como
+        // dato por si hace falta más adelante (ej. accesibilidad).
+        let html = '<div class="punto-circuito-item" data-punto-id="' + punto.id + '" data-orden="' + numero + '">';
+        html += '<div class="punto-circuito-numero"></div>';
         html += '<div class="punto-circuito-contenido">';
         html += '<h3 class="punto-circuito-titulo">' + punto.titulo + '</h3>';
 
@@ -86,6 +89,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 seleccionarPunto(Number(item.dataset.puntoId));
             });
         });
+
+        dibujarLineaCircuito();
+    }
+
+    // La línea va del centro del primer punto al centro del último. Su alto
+    // depende del contenido real de cada punto (audio/imagen/descripción
+    // varían), así que no hay forma de calcularlo en CSS puro — se mide acá.
+    // El `left` NO se mide (queda fijo en CSS, ver .circuito-linea): medirlo
+    // con getBoundingClientRect() quedaba sujeto a redondeo de subpíxeles
+    // y no coincidía siempre con el centro real del bullet.
+    function dibujarLineaCircuito() {
+        const bullets = panelApi.panelContenido.querySelectorAll('.punto-circuito-numero');
+        const contenedor = panelApi.panelContenido.querySelector('.circuito-puntos');
+        if (!contenedor || bullets.length < 2) return;
+
+        let linea = contenedor.querySelector('.circuito-linea');
+        if (!linea) {
+            linea = document.createElement('div');
+            linea.className = 'circuito-linea';
+            contenedor.insertBefore(linea, contenedor.firstChild);
+        }
+
+        const contenedorRect = contenedor.getBoundingClientRect();
+        const primero = bullets[0].getBoundingClientRect();
+        const ultimo = bullets[bullets.length - 1].getBoundingClientRect();
+
+        const y1 = (primero.top + primero.height / 2) - contenedorRect.top;
+        const y2 = (ultimo.top + ultimo.height / 2) - contenedorRect.top;
+
+        linea.style.top = y1 + 'px';
+        linea.style.height = (y2 - y1) + 'px';
     }
 
     function scrollAlPunto(puntoId) {
@@ -152,13 +186,20 @@ document.addEventListener('DOMContentLoaded', function () {
             if (circuitoActual !== circuitoId) return;
 
             cache[circuitoId] = data;
-            if (panelApi.panelTituloSticky) panelApi.panelTituloSticky.textContent = data.titulo;
+            if (panelApi.panelTituloSticky) {
+                panelApi.panelTituloSticky.innerHTML = '<span class="panel-eyebrow">Circuito</span>' + data.titulo;
+            }
             renderizar(data);
             seleccionarPunto(puntoSeleccionadoId);
 
             if (estabaCerrado) {
+                // Igual que el scroll: si se mide mientras el panel todavía
+                // está animando su ancho (0 → 450px), la línea sale mal
+                // posicionada. Se recalcula recién cuando termina.
                 panelApi.panel.addEventListener('transitionend', function () {
-                    if (circuitoActual === circuitoId) scrollAlPunto(puntoSeleccionadoId);
+                    if (circuitoActual !== circuitoId) return;
+                    scrollAlPunto(puntoSeleccionadoId);
+                    dibujarLineaCircuito();
                 }, { once: true });
             }
         };

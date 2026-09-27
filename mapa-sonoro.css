@@ -93,9 +93,19 @@ body.mapa-page {
 #mapa-panel {
     display: flex;
     flex-direction: column;
-    background: white;
+    background: #fff;
     z-index: 1000;
     box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+
+/* El fondo va en el contenido, no en el panel: es lo que realmente
+   scrollea (overflow-y: auto), así que el papel se desplaza junto con el
+   texto en vez de quedar fijo detrás. background-attachment: local es la
+   parte que realmente lo logra — el valor por defecto (scroll) deja el
+   fondo pegado al contenedor visible incluso cuando el que se mueve es
+   el propio elemento con overflow. */
+#panel-contenido {
+    background: #fff url('assets/paper-texture.png') repeat local;
 }
 
 #panel-header {
@@ -114,6 +124,16 @@ body.mapa-page {
     font-weight: 700;
     line-height: 1.3;
     flex: 1;
+}
+
+/* Eyebrow "Circuito" arriba del título — solo aparece cuando el panel
+   muestra un circuito, no en un punto suelto (ver mapa-circuitos.js). */
+.panel-eyebrow {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 2px;
 }
 
 #panel-cerrar {
@@ -294,41 +314,85 @@ body.mapa-page {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    /* Referencia para .circuito-linea, que se posiciona absoluta */
+    position: relative;
+}
+
+/* Línea que atraviesa todos los puntos del circuito, del primero al
+   último — la dibuja mapa-circuitos.js (dibujarLineaCircuito) porque su
+   alto depende del contenido real de cada punto, que varía (no hay forma
+   de calcularlo en CSS puro). Mismo color que los puntos no seleccionados.
+   z-index 1: por encima del fondo de hover (0), por debajo del contenido (2). */
+.circuito-linea {
+    position: absolute;
+    /* Centrado respecto al bullet por valores CSS fijos, no por medición:
+       .punto-circuito-item tiene padding:12px, el bullet mide 10px de
+       ancho → su centro cae en 12 + 10/2 = 17px. La línea mide 2px, así
+       que arranca 1px antes de ese centro (17 - 2/2 = 16px). Medir esto
+       con getBoundingClientRect() en JS quedaba sujeto a redondeo de
+       subpíxeles entre la medición y cómo el navegador rasteriza el
+       círculo — con un valor fijo no hay ninguna otra fuente de desvío.
+       Si cambia el padding o el ancho del bullet, hay que recalcular esto. */
+    left: 16px;
+    width: 2px;
+    background: #B0B0B0;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .punto-circuito-item {
     display: flex;
-    gap: 12px;
+    /* Separación entre la línea/bullet y el contenido: 12px de base + 8px
+       de más, a pedido. Si el conjunto queda muy corrido del borde del
+       panel, achicar el padding-left en vez de este gap (que es lo que
+       mantiene la línea alineada con el resto del componente). */
+    gap: 20px;
     padding: 12px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s ease;
+    position: relative;
 }
 
-.punto-circuito-item:hover {
+/* Fondo del hover en su propia capa, por debajo de la línea — si viviera
+   directo en .punto-circuito-item (que ya es position:relative para el
+   bullet/contenido) taparía la línea al pasar el mouse. */
+.punto-circuito-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: transparent;
+    transition: background 0.15s ease;
+    z-index: 0;
+}
+
+.punto-circuito-item:hover::before {
     background: #f8f8f8;
 }
 
-.punto-circuito-item.activo {
-    background: #fdf0ee;
-}
-
+/* El punto: chico y gris cuando no está seleccionado, más grande y del
+   color de acento cuando sí — ya no lleva número adentro (se saca del
+   front nomás; el orden real sigue viniendo del backend). Encima de la
+   línea (z-index 2) para que esta pase "por detrás" del bullet. */
 .punto-circuito-numero {
     flex-shrink: 0;
-    width: 26px;
-    height: 26px;
+    width: 10px;
+    height: 10px;
+    margin-top: 6px;
     border-radius: 50%;
-    background: #2a2a2a;
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #B0B0B0;
+    position: relative;
+    z-index: 2;
+    /* Escala en vez de cambiar width/height: así el centro del punto no se
+       mueve entre estados (con width/height reales, mantener el borde
+       izquierdo fijo corre el centro hacia la derecha al agrandarse, y
+       deja de coincidir con la línea). */
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .punto-circuito-item.activo .punto-circuito-numero {
-    background: #FE4735;
+    background: #FE4734;
+    transform: scale(1.6);
 }
 
 .punto-circuito-contenido {
@@ -337,6 +401,8 @@ body.mapa-page {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    z-index: 2;
 }
 
 .punto-circuito-titulo {
@@ -344,6 +410,12 @@ body.mapa-page {
     font-weight: 700;
     line-height: 1.3;
     margin: 0;
+    color: #4b5563;
+    transition: color 0.15s ease;
+}
+
+.punto-circuito-item.activo .punto-circuito-titulo {
+    color: #FE4734;
 }
 
 /* VIDEO: placeholder + reproductor on-demand */
