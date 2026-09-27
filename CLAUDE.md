@@ -22,6 +22,9 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
 - `mapa-circuitos.js` — Vista de circuito en el mapa público (feed de puntos,
   navegación, caché en memoria). Depende de `window.MapaSonoroPanel`, que
   expone `mapa-sonoro.js`
+- `mapa-lightbox.js` — Lightbox de fotos (click en `.punto-imagen` la abre
+  en pantalla completa). Independiente de los otros dos: usa delegación de
+  eventos en `document`, no depende de cuándo/dónde se insertan las fotos
 - `acf-json/` — Field groups de ACF (Local JSON). Los CPT NO viven acá: se
   crean con CPT UI y se guardan en la base de datos de cada entorno
 
@@ -121,17 +124,23 @@ sí lo hace tocar un punto de otro circuito o uno suelto.
   10px gris `#B0B0B0` / 16px `#FE4734` cuando está seleccionado, vía
   `transform: scale()` para no correr el centro entre estados) + título
   (mismo acento cuando seleccionado, gris `#4b5563` si no).
-- Una línea (`.circuito-linea`, mismo gris que los bullets) atraviesa todos
-  los puntos del feed, del primero al último. La dibuja
-  `dibujarLineaCircuito()` en JS porque el alto entre un punto y el
-  siguiente depende del contenido real (variable) — no hay forma de
-  calcularlo en CSS puro. El `left` SÍ queda fijo en CSS (no medido): está
-  derivado del padding y ancho del bullet, ver el comentario en
-  `.circuito-linea` si esos valores cambian. Se recalcula cuando el panel
-  termina de animarse (si estaba cerrado), igual que el scroll.
-- Capas del feed (de atrás para adelante): fondo del hover (`::before`,
-  z-index 0) → línea (z-index 1) → bullet y contenido (z-index 2). Así el
-  hover no tapa la línea, y la línea pasa "por detrás" de los bullets.
+- Una línea (`.circuito-linea`, `#B0B0B0`) atraviesa todos los puntos del
+  feed, del primero al último. La dibuja `dibujarLineaCircuito()` en JS
+  porque el alto entre un punto y el siguiente depende del contenido real
+  (variable) — no hay forma de calcularlo en CSS puro. El `left` SÍ queda
+  fijo en CSS (no medido): está derivado del border + padding + ancho del
+  bullet de `.punto-circuito-item`, ver el comentario en `.circuito-linea`
+  si esos valores cambian. Se recalcula cuando el panel termina de
+  animarse (si estaba cerrado), igual que el scroll.
+- Punto seleccionado (`.activo`): además del bullet/título en acento, la
+  card entera lleva el fondo del hover de forma persistente + un borde de
+  2px `#FE4734` alrededor. El borde vive siempre (transparente cuando no
+  está seleccionado) para que activar/desactivar un punto no reacomode el
+  layout.
+- Capas del feed (de atrás para adelante): fondo del hover en un punto sin
+  seleccionar (`::before`, z-index 0) → línea (z-index 1) → fondo del
+  punto SELECCIONADO (z-index 2, por eso la línea queda oculta detrás de
+  la card activa) → bullet y contenido (z-index 3, siempre visibles).
 - `mapa-sonoro.js` expone `window.MapaSonoroPanel` (mapa, panel, marcadores,
   `registrarAudio`) para que `mapa-circuitos.js` no duplique esa lógica.
 - La respuesta de cada circuito se cachea en memoria (`const cache = {}`
@@ -154,6 +163,24 @@ sí lo hace tocar un punto de otro circuito o uno suelto.
   vertical extra, para que las esquinas giradas no se solapen con el
   contenido de arriba/abajo. El video NO lleva nada de este efecto
   (`.punto-video` sigue en `border-radius: 8px`, sin borde ni rotación)
+
+### Lightbox de fotos (`mapa-lightbox.js`)
+
+Click en cualquier `.punto-imagen` (punto suelto o feed de circuito) la
+abre en pantalla completa. Markup fijo en `template-mapa.php`
+(`#lightbox`, `hidden` por defecto), reutilizado para cualquier foto —
+delegación de eventos en `document`, no hace falta cablear cada imagen.
+
+- Zoom: click en la imagen alterna `.ampliada` (tamaño real en vez de
+  ajustada a pantalla); si no entra, el `.lightbox` de afuera tiene
+  `overflow: auto` para recorrerla.
+- Cierre: botón ✕, Escape, o click en el fondo. El Escape hace
+  `stopPropagation()` — si no, también dispara el Escape que cierra
+  `#mapa-panel` por detrás.
+- Accesible: `role="dialog"` + `aria-modal`, foco al botón cerrar al
+  abrir, foco de vuelta a la foto disparadora al cerrar, y un trap de Tab
+  simple (el único control interno es el botón cerrar, así que Tab
+  siempre vuelve ahí).
 
 ## Datos pasados al JS admin (`MapaAdmin`)
 

@@ -48,6 +48,11 @@
     <p>Hecho por lxs pibxs y el Club Isleños Unidos de Isla Santiago, Argentina</p>
 </footer>
 
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada" hidden>
+    <button type="button" class="lightbox-cerrar" aria-label="Cerrar imagen ampliada">✕</button>
+    <img class="lightbox-imagen" src="" alt="">
+</div>
+
 <?php wp_footer(); ?>
 </body>
 </html>

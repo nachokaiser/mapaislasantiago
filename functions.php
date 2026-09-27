@@ -12,6 +12,9 @@ function mapa_sonoro_scripts() {
         wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', [], null, true);
         wp_enqueue_script('mapa-sonoro-js', get_stylesheet_directory_uri() . '/mapa-sonoro.js', ['leaflet-js'], null, true);
         wp_enqueue_script('mapa-circuitos-js', get_stylesheet_directory_uri() . '/mapa-circuitos.js', ['mapa-sonoro-js'], null, true);
+        // Independiente de los otros dos: usa delegación de eventos en
+        // document, no necesita que existan de antemano.
+        wp_enqueue_script('mapa-lightbox-js', get_stylesheet_directory_uri() . '/mapa-lightbox.js', [], null, true);
         wp_enqueue_style('mapa-sonoro-css', get_stylesheet_directory_uri() . '/mapa-sonoro.css');
 
         // Pasar solo los datos necesarios para los marcadores

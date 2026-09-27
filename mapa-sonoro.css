@@ -326,14 +326,16 @@ body.mapa-page {
 .circuito-linea {
     position: absolute;
     /* Centrado respecto al bullet por valores CSS fijos, no por medición:
-       .punto-circuito-item tiene padding:12px, el bullet mide 10px de
-       ancho → su centro cae en 12 + 10/2 = 17px. La línea mide 2px, así
-       que arranca 1px antes de ese centro (17 - 2/2 = 16px). Medir esto
-       con getBoundingClientRect() en JS quedaba sujeto a redondeo de
+       .punto-circuito-item tiene un border de 2px (transparente salvo
+       cuando está seleccionado) + padding:12px, y el bullet mide 10px de
+       ancho → su centro cae en 2 + 12 + 10/2 = 19px. La línea mide 2px,
+       así que arranca 1px antes de ese centro (19 - 2/2 = 18px). Medir
+       esto con getBoundingClientRect() en JS quedaba sujeto a redondeo de
        subpíxeles entre la medición y cómo el navegador rasteriza el
        círculo — con un valor fijo no hay ninguna otra fuente de desvío.
-       Si cambia el padding o el ancho del bullet, hay que recalcular esto. */
-    left: 16px;
+       Si cambia el border, el padding o el ancho del bullet, hay que
+       recalcular esto. */
+    left: 18px;
     width: 2px;
     background: #B0B0B0;
     z-index: 1;
@@ -351,11 +353,21 @@ body.mapa-page {
     border-radius: 8px;
     cursor: pointer;
     position: relative;
+    box-sizing: border-box;
+    /* Transparente siempre reservado (en vez de agregarlo solo en .activo)
+       para que activar/desactivar un punto no reacomode el layout. */
+    border: 2px solid transparent;
 }
 
-/* Fondo del hover en su propia capa, por debajo de la línea — si viviera
-   directo en .punto-circuito-item (que ya es position:relative para el
-   bullet/contenido) taparía la línea al pasar el mouse. */
+.punto-circuito-item.activo {
+    border-color: #FE4734;
+}
+
+/* Fondo del hover en su propia capa. Para un punto SIN seleccionar, va
+   por debajo de la línea (z-index 0 < 1) — si viviera directo en
+   .punto-circuito-item taparía la línea al pasar el mouse. Para el punto
+   SELECCIONADO es al revés: el fondo pasa a z-index 2, por ENCIMA de la
+   línea, así la línea queda oculta detrás de la card activa. */
 .punto-circuito-item::before {
     content: '';
     position: absolute;
@@ -366,14 +378,21 @@ body.mapa-page {
     z-index: 0;
 }
 
-.punto-circuito-item:hover::before {
+.punto-circuito-item.activo::before {
+    z-index: 2;
+}
+
+/* Seleccionado: mismo fondo que el hover, pero persistente (no solo al
+   pasar el mouse) — el hover en sí no cambia para un punto ya seleccionado. */
+.punto-circuito-item:hover::before,
+.punto-circuito-item.activo::before {
     background: #f8f8f8;
 }
 
 /* El punto: chico y gris cuando no está seleccionado, más grande y del
    color de acento cuando sí — ya no lleva número adentro (se saca del
-   front nomás; el orden real sigue viniendo del backend). Encima de la
-   línea (z-index 2) para que esta pase "por detrás" del bullet. */
+   front nomás; el orden real sigue viniendo del backend). Siempre por
+   encima de todo lo demás (línea y fondo, sea cual sea su z-index). */
 .punto-circuito-numero {
     flex-shrink: 0;
     width: 10px;
@@ -382,7 +401,7 @@ body.mapa-page {
     border-radius: 50%;
     background: #B0B0B0;
     position: relative;
-    z-index: 2;
+    z-index: 3;
     /* Escala en vez de cambiar width/height: así el centro del punto no se
        mueve entre estados (con width/height reales, mantener el borde
        izquierdo fijo corre el centro hacia la derecha al agrandarse, y
@@ -402,7 +421,7 @@ body.mapa-page {
     flex-direction: column;
     gap: 10px;
     position: relative;
-    z-index: 2;
+    z-index: 3;
 }
 
 .punto-circuito-titulo {
@@ -502,6 +521,8 @@ body.mapa-page {
        audio/descripción de arriba o abajo. */
     margin-top: 10px;
     margin-bottom: 10px;
+    /* Clickeable: abre el lightbox (mapa-lightbox.js) */
+    cursor: pointer;
 }
 
 .punto-descripcion {
@@ -559,4 +580,61 @@ body.mapa-page {
 
 #mapa-footer p {
     margin: 0;
+}
+
+/* LIGHTBOX de fotos (mapa-lightbox.js) */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 40px;
+}
+
+.lightbox[hidden] {
+    display: none;
+}
+
+.lightbox-cerrar {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-cerrar:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-imagen {
+    max-width: 100%;
+    max-height: calc(100vh - 80px);
+    object-fit: contain;
+    cursor: zoom-in;
+    display: block;
+    margin: auto;
+}
+
+/* Zoom: toggle a tamaño real. Si no entra en pantalla, el overflow:auto
+   del .lightbox de afuera permite scrollear para recorrerla. */
+.lightbox-imagen.ampliada {
+    max-width: none;
+    max-height: none;
+    width: auto;
+    cursor: zoom-out;
 }
