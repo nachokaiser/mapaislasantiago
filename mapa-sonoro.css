@@ -410,13 +410,26 @@ body.mapa-page {
 }
 
 .punto-imagen {
+    box-sizing: border-box;
     width: 100%;
-    /* Con los atributos width/height del <img>, esto deja que el navegador
-       derive la proporción y reserve el alto antes de que cargue. */
+    /* Sin aspect-ratio forzado: el contenedor se adapta a la relación de
+       aspecto real de cada foto (cuadrada, vertical, panorámica...). Con
+       los atributos width/height del <img>, esto además deja que el
+       navegador derive la proporción y reserve el alto antes de que
+       cargue la imagen. */
     height: auto;
-    border-radius: 8px;
+    border-radius: 2px;
     display: block;
     object-fit: cover;
+    /* Efecto polaroid: solo en fotos, los videos no lo llevan. */
+    border: 8px solid #fff;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.20);
+    transform: rotate(-1.416deg);
+    /* La rotación es visual, no achica el espacio que ocupa en el layout:
+       este margen extra evita que las esquinas giradas se solapen con el
+       audio/descripción de arriba o abajo. */
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .punto-descripcion {

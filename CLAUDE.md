@@ -127,6 +127,14 @@ tocar un punto de otro circuito o uno suelto.
   YouTube muestra una miniatura real (URL pública predecible); Vimeo no
   (implicaría una llamada a su API por video) — placeholder genérico.
   Si hay archivo subido y link embebido a la vez, gana el archivo.
+- Fotos (`.punto-imagen`) con efecto polaroid: sin `aspect-ratio` forzado
+  (se adaptan a la proporción real de cada foto, a diferencia del video que
+  sí fuerza 16/9), `border-radius: 2px`, borde blanco sólido de 8px,
+  sombra, y rotadas `-1.416deg`. La rotación es solo visual — no reduce el
+  espacio que la imagen ocupa en el layout — por eso lleva 10px de margen
+  vertical extra, para que las esquinas giradas no se solapen con el
+  contenido de arriba/abajo. El video NO lleva nada de este efecto
+  (`.punto-video` sigue en `border-radius: 8px`, sin borde ni rotación)
 
 ## Datos pasados al JS admin (`MapaAdmin`)
 
