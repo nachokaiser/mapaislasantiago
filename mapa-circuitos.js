@@ -19,7 +19,13 @@ document.addEventListener('DOMContentLoaded', function () {
         html += panelApi.crearBloqueVideo(punto.video, punto.titulo, punto.id);
 
         if (punto.imagen) {
-            html += '<img class="punto-imagen" src="' + punto.imagen + '" alt="' + punto.titulo + '" loading="lazy">';
+            // width/height declarados para que el navegador reserve el alto
+            // antes de cargar la imagen. Sin esto el feed se reacomoda al ir
+            // cargando y el scroll al punto activo queda desfasado.
+            const medidas = punto.imagen_ancho && punto.imagen_alto
+                ? ' width="' + punto.imagen_ancho + '" height="' + punto.imagen_alto + '"'
+                : '';
+            html += '<img class="punto-imagen" src="' + punto.imagen + '" alt="' + punto.titulo + '"' + medidas + ' loading="lazy">';
         }
 
         if (punto.descripcion) {
@@ -82,6 +88,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function scrollAlPunto(puntoId) {
+        const item = panelApi.panelContenido.querySelector('.punto-circuito-item[data-punto-id="' + puntoId + '"]');
+        if (item) item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     // `reproducir` va en false cuando el usuario ya arrancó un medio a mano
     // (tocó play en el audio o en el video): ahí solo queremos el destacado
     // y el centrado, no volver a decidir qué se reproduce.
@@ -96,10 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
             el.classList.toggle('activo', Number(el.dataset.puntoId) === puntoId);
         });
 
-        const itemActivo = panelApi.panelContenido.querySelector('.punto-circuito-item[data-punto-id="' + puntoId + '"]');
-        if (itemActivo) {
-            itemActivo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        scrollAlPunto(puntoId);
 
         panelApi.seleccionarMarcador(puntoId);
 
@@ -125,6 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // El panel cerrado entra con una animación de 0.3s. Si el scroll se
+        // calcula durante esa animación, mide sobre un panel más angosto
+        // (el texto envuelve distinto) y queda desfasado.
+        const estabaCerrado = !panelApi.panel.classList.contains('activo');
+
         if (panelApi.panelTituloSticky) panelApi.panelTituloSticky.textContent = '';
         panelApi.panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
         panelApi.panel.classList.add('activo');
@@ -138,6 +151,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (panelApi.panelTituloSticky) panelApi.panelTituloSticky.textContent = data.titulo;
             renderizar(data);
             seleccionarPunto(puntoSeleccionadoId);
+
+            if (estabaCerrado) {
+                panelApi.panel.addEventListener('transitionend', function () {
+                    if (circuitoActual === circuitoId) scrollAlPunto(puntoSeleccionadoId);
+                }, { once: true });
+            }
         };
 
         if (cache[circuitoId]) {

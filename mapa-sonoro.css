@@ -424,6 +424,9 @@
 
 .punto-imagen {
     width: 100%;
+    /* Con los atributos width/height del <img>, esto deja que el navegador
+       derive la proporción y reserve el alto antes de que cargue. */
+    height: auto;
     border-radius: 8px;
     display: block;
     object-fit: cover;

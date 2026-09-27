@@ -98,6 +98,12 @@ su detalle completo (`descripcion`, `audio`, `video`, `imagen`) — una sola
 llamada trae todo el circuito. Sin galería de imágenes: `punto-sonoro` solo
 tiene `imagen_punto`, una imagen.
 
+La imagen viaja con sus medidas (`imagen_ancho` / `imagen_alto`) y el front
+las escribe como atributos `width`/`height` del `<img>`. No es cosmético: sin
+eso, una imagen lazy ocupa alto ~0 hasta que carga, el feed se reacomoda a
+medida que las imágenes van entrando, y el scroll al punto activo queda
+desfasado al abrir un circuito.
+
 ### Vista de circuito en el front (`mapa-circuitos.js`)
 
 Al tocar un marcador con `circuito_id`, se abre un feed vertical con todos

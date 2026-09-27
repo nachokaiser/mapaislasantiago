@@ -274,8 +274,12 @@ add_action( 'rest_api_init', function () {
 } );
 
 // Detalle completo de un punto sonoro, para el feed del circuito. Sin
-// campo de video ni galería: no existen todavía en ACF (solo audio, una
-// imagen y descripción). Cuando se agreguen, extender acá.
+// galería de imágenes: no existe todavía en ACF (solo `imagen_punto`).
+//
+// Las medidas de la imagen viajan junto a la URL para que el front pueda
+// reservarle el espacio antes de que cargue: si no, el feed se reacomoda
+// a medida que van cargando las imágenes y el scroll al punto activo
+// queda desfasado.
 function mapa_sonoro_punto_detalle_para_circuito( $punto_id ) {
     $audio  = get_field( 'audio', $punto_id );
     $imagen = get_field( 'imagen_punto', $punto_id );
@@ -286,9 +290,11 @@ function mapa_sonoro_punto_detalle_para_circuito( $punto_id ) {
         'lat'         => (float) get_field( 'latitud', $punto_id ),
         'lng'         => (float) get_field( 'longitud', $punto_id ),
         'descripcion' => get_field( 'descripcion-punto', $punto_id ) ?: null,
-        'audio'       => $audio  ? $audio['url']  : null,
-        'video'       => mapa_sonoro_extraer_video( $punto_id ),
-        'imagen'      => $imagen ? $imagen['url'] : null,
+        'audio'        => $audio  ? $audio['url']  : null,
+        'video'        => mapa_sonoro_extraer_video( $punto_id ),
+        'imagen'       => $imagen ? $imagen['url'] : null,
+        'imagen_ancho' => $imagen ? (int) $imagen['width']  : null,
+        'imagen_alto'  => $imagen ? (int) $imagen['height'] : null,
     ];
 }
 
