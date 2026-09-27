@@ -344,6 +344,9 @@ body.mapa-page {
 
 .punto-circuito-item {
     display: flex;
+    /* Aire entre el punto y el header fijo del panel al hacer scroll hasta
+       él (scrollAlPunto usa scrollIntoView, que respeta esto solo). */
+    scroll-margin-top: 12px;
     /* Separación entre la línea/bullet y el contenido: 12px de base + 8px
        de más, a pedido. Si el conjunto queda muy corrido del borde del
        panel, achicar el padding-left en vez de este gap (que es lo que
