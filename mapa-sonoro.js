@@ -22,68 +22,21 @@ document.addEventListener("DOMContentLoaded", function () {
         maxBounds:           mapConfig.maxBounds,
     });
 
+    // Se probó Esri World Light Gray Canvas (sin íconos de POI, gratis, sin
+    // API key) pero el gris monocromático perdía demasiado — el color del
+    // agua/vegetación importa más que sacar los íconos. Sin otra opción
+    // gratis-sin-key que combine ambas cosas, se vuelve a OSM.
     L.tileLayer('https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxNativeZoom: 18,
         maxZoom: 18
     }).addTo(map);
 
+    // El atributo de OpenStreetMap es obligatorio por su licencia (ODbL) y
+    // se mantiene; el prefijo "Leaflet" que agrega el control por defecto
+    // es opcional y se saca.
+    map.attributionControl.setPrefix(false);
 
-    // Recorrido
-    const recorridos = {
-        recorrido_principal: {
-            color: 'rgba(253, 195, 22, 0.9)',
-            coordenadas: [
-                [-34.8358481, -57.8819484],
-                [-34.8335409, -57.8810016],
-                [-34.8326909, -57.8838421],
-                [-34.835071,  -57.8852328],
-                [-34.8344881, -57.8878957],
-                [-34.8322537, -57.8860612],
-                [-34.8310637, -57.882481 ],
-                [-34.8301408, -57.8826586],
-                [-34.830612,  -57.8842151],
-                [-34.8340581, -57.8890764],
-                [-34.8353795, -57.8887607],
-                [-34.8359755, -57.8873402],
-                [-34.8380741, -57.8871193],
-                [-34.83981,   -57.8875927],
-                [-34.8408981, -57.8904022]
-            ]
-        }
-    };
-
-    const lineasActivas = {};
-
-    Object.keys(recorridos).forEach(function(id) {
-        const r = recorridos[id];
-        const linea = L.polyline(r.coordenadas, {
-            color: r.color,
-            weight: 4,
-            opacity: 0.8
-        });
-        lineasActivas[id] = { linea: linea, visible: false };
-    });
-
-    // Toggle único para todos los recorridos
-    const btnRecorridos = document.getElementById('toggle-recorridos');
-    let recorridosVisibles = false;
-
-    if (btnRecorridos) {
-        btnRecorridos.addEventListener('click', function () {
-            recorridosVisibles = !recorridosVisibles;
-            Object.values(lineasActivas).forEach(function (item) {
-                if (recorridosVisibles) {
-                    item.linea.addTo(map);
-                } else {
-                    map.removeLayer(item.linea);
-                }
-                item.visible = recorridosVisibles;
-            });
-            btnRecorridos.classList.toggle('activo', recorridosVisibles);
-            btnRecorridos.setAttribute('aria-pressed', recorridosVisibles);
-        });
-    }
 
     const panel = document.getElementById('mapa-panel');
     const panelContenido = document.getElementById('panel-contenido');

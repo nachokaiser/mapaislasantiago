@@ -30,13 +30,6 @@
             'fallback_cb'    => false,
         ]); ?>
     </nav>
-
-    <div class="mapa-header-controles">
-        <button id="toggle-recorridos" class="toggle-recorridos-ctrl" aria-pressed="false">
-                <span class="toggle-recorridos-label">Mostrar recorridos</span>
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </button>
-    </div>
 </header>
 
 <div id="mapa-wrapper">
@@ -52,7 +45,7 @@
 </div>
 
 <footer id="mapa-footer">
-    <p>&copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?></p>
+    <p>Hecho por lxs pibxs y el Club Isleños Unidos de Isla Santiago, Argentina</p>
 </footer>
 
 <?php wp_footer(); ?>

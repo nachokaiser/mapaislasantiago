@@ -139,6 +139,12 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 
 ## Mapa público — comportamiento
 
+- Layout de página fijo al viewport (`body.mapa-page` en flex-column,
+  `height: 100dvh`, `overflow: hidden`): el único scroll de toda la página
+  es el de `#panel-contenido`. Header y footer quedan siempre visibles.
+  `#mapa-wrapper` (mapa + panel) usa `flex: 1; min-height: 0` para ocupar
+  lo que sobra — si se le vuelve a poner una altura fija en vez de dejarlo
+  crecer por flexbox, el body puede volver a superar el viewport
 - Centro: `-34.834911, -57.901543`, zoom 14, minZoom 12/13, maxZoom 18
 - `maxBounds` limitado a la isla
 - Tile: `https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png`
@@ -146,6 +152,8 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
   con stroke oscuro. El tamaño está en dos lados y tiene que coincidir — el
   CSS y el `iconSize`/`iconAnchor` del `divIcon`, o el punto queda corrido
   respecto a su coordenada
+- Hover y seleccionado comparten el mismo `transform: scale(1.2)` — hover no
+  se suma al de seleccionado, es el mismo valor
 - Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
 - Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo
@@ -154,7 +162,6 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Al seleccionar un punto arranca solo su medio (`reproducirMedio`): si tiene
   audio gana el audio, si no se activa el video. Suena un solo medio a la vez
   en todo el panel — arrancar un audio corta cualquier video y viceversa
-- Recorridos como `L.polyline`, toggle via botón `#toggle-recorridos`
 
 ## Mapa admin — comportamiento
 
@@ -185,3 +192,13 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Trazo del circuito dibujado en el mapa mientras la vista está abierta
 - Compartir circuito por URL
 - Filtros por etiquetas
+- Accesos directos a circuitos en el header — ahí vivía el toggle de
+  "Mostrar recorridos" (junto con los `L.polyline` hardcodeados que
+  dibujaba), que se sacó entero por quedar sin uso
+- Tiles del mapa público sin íconos de POI (restaurantes, comercios, etc.):
+  hoy vienen "horneados" en la imagen del tile de OSM.de, no son una capa
+  aparte que se pueda ocultar. Se probó Esri World Light Gray Canvas (sin
+  key, sin POIs) pero el gris monocromático perdía demasiado color frente
+  al agua/vegetación del estilo actual — se descartó. No hay ninguna
+  opción gratis-sin-key que combine ambas cosas; requeriría tiles propios
+  con estilo custom (Mapbox Studio / MapTiler con key, o similar)

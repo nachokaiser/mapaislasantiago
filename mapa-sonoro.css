@@ -2,17 +2,31 @@
     --header-h: 56px;
 }
 
+/* La página completa vive dentro del viewport: el único scroll es el del
+   panel de puntos/circuitos (#panel-contenido). Header y footer quedan
+   siempre visibles, arriba y abajo. */
+html {
+    height: 100%;
+}
+
+body.mapa-page {
+    margin: 0;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 /* HEADER */
 #mapa-header {
     height: var(--header-h);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 0 20px;
     background: #fff;
     border-bottom: 1px solid #eee;
     gap: 24px;
-    position: sticky;
-    top: 0;
     z-index: 1001;
 }
 
@@ -53,78 +67,26 @@
     color: #000;
 }
 
-.mapa-header-controles {
-    flex-shrink: 0;
-}
-
-/* TOGGLE RECORRIDOS */
-.toggle-recorridos-ctrl {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 0;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.toggle-recorridos-ctrl:hover,
-.toggle-recorridos-ctrl:focus {
-    outline: none;
-    background: none;
-}
-
-.toggle-recorridos-ctrl:hover .toggle-track {
-    background: #ccc;
-}
-
-.toggle-recorridos-ctrl.activo:hover .toggle-track {
-    background: #2a2a2a;
-}
-
-.toggle-recorridos-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #2a2a2a;
-    white-space: nowrap;
-}
-
-.toggle-track {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    background: #ccc;
-    border-radius: 12px;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-}
-
-.toggle-thumb {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 50%;
-    transition: transform 0.2s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-}
-
-.toggle-recorridos-ctrl.activo .toggle-track {
-    background: #2a2a2a;
-}
-
-.toggle-recorridos-ctrl.activo .toggle-thumb {
-    transform: translateX(20px);
+/* El wrapper ocupa lo que sobra entre header y footer. min-height: 0 es
+   necesario para que un hijo flex con overflow interno pueda scrollear en
+   vez de forzar la altura del wrapper hacia arriba. */
+#mapa-wrapper {
+    flex: 1;
+    min-height: 0;
 }
 
 /* MAPA */
 #mapa-contenedor {
     width: 100%;
-    height: calc(100vh - var(--header-h));
+    height: 100%;
     z-index: 0;
+}
+
+/* Atributo de OpenStreetMap: obligatorio por licencia, discreto igual */
+.leaflet-control-attribution {
+    font-size: 9px;
+    padding: 1px 4px;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 /* BASE PANEL */
@@ -176,7 +138,12 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     position: relative;
     cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s ease, background 0.15s;
+}
+
+.marcador-sonoro:hover,
+.marcador-sonoro.selected {
+    transform: scale(1.2);
 }
 
 .marcador-sonoro::before,
@@ -255,7 +222,7 @@
         position: relative;
         width: 0;
         min-width: 0;
-        max-height: calc(100vh - var(--header-h));
+        max-height: 100%;
         overflow: hidden;
         opacity: 0;
         transition: width 0.3s ease, min-width 0.3s ease, opacity 0.15s ease;
@@ -475,10 +442,16 @@
 
 /* FOOTER */
 #mapa-footer {
-    padding: 16px 20px;
+    flex-shrink: 0;
+    padding: 6px 20px;
     background: #f8f8f8;
     border-top: 1px solid #eee;
-    font-size: 13px;
+    font-size: 11px;
+    line-height: 1.4;
     color: #666;
     text-align: center;
+}
+
+#mapa-footer p {
+    margin: 0;
 }

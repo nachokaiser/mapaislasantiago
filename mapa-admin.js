@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
         maxZoom: 18,
     }).addTo(map);
 
+    map.attributionControl.setPrefix(false);
+
     const iconoOtro = L.divIcon({
         html: '<div class="marcador-admin marcador-otro"></div>',
         className: '',
