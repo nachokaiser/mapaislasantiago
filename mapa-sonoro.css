@@ -127,22 +127,45 @@ body.mapa-page {
     line-height: 1;
 }
 
-/* MARCADOR */
+/* MARCADOR — 4 estados: idle, hover, seleccionado, mismo circuito (+ su
+   variante hover). `.mismo-circuito` se le pone a TODOS los puntos del
+   circuito abierto en el panel, seleccionado incluido — el `:not(.selected)`
+   de abajo es lo que le cede el paso al estilo de seleccionado cuando
+   ambas clases coinciden en el mismo punto. */
 .marcador-sonoro {
     box-sizing: border-box;
     width: 18px;
     height: 18px;
     border-radius: 50%;
     background: #f7f7f5;
-    border: 3px solid #3a3a3a;
+    border: 1px solid #3a3a3a;
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     position: relative;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s;
+    transition: transform 0.15s ease, background 0.15s, border-color 0.15s;
 }
 
-.marcador-sonoro:hover,
+/* Hover puro: los mismos colores de idle, solo cambia el tamaño */
+.marcador-sonoro:hover {
+    transform: scale(1.2);
+}
+
+/* Seleccionado: el punto que se está mostrando en el panel ahora mismo */
 .marcador-sonoro.selected {
+    transform: scale(1.2);
+    background: #FE4734;
+    border-color: #FE4734;
+}
+
+/* Mismo circuito (idle): puntos del circuito abierto, sin ser el activo */
+.marcador-sonoro.mismo-circuito:not(.selected) {
+    background: #FFD7D3;
+    border-color: #FE4734;
+    border-width: 2px;
+}
+
+/* Mismo circuito + hover: mismo color de arriba, solo cambia el tamaño */
+.marcador-sonoro.mismo-circuito:not(.selected):hover {
     transform: scale(1.2);
 }
 
@@ -158,19 +181,16 @@ body.mapa-page {
     pointer-events: none;
 }
 
-.marcador-sonoro.selected {
-    background: #FE4735;
-    border-color: #3a3a3a;
-}
-
+/* La onda es exclusiva del seleccionado — ni el hover simple ni el de
+   "mismo circuito" la llevan. */
 .marcador-sonoro.selected::before {
     width: 34px; height: 34px;
-    border-color: rgba(254, 71, 53, 0.5);
+    border-color: rgba(254, 71, 52, 0.5);
     animation: onda 2s ease-out infinite;
 }
 .marcador-sonoro.selected::after {
     width: 50px; height: 50px;
-    border-color: rgba(254, 71, 53, 0.5);
+    border-color: rgba(254, 71, 52, 0.5);
     animation: onda 2s ease-out infinite 0.6s;
 }
 

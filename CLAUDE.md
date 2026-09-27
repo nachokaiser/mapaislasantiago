@@ -149,11 +149,26 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - `maxBounds` limitado a la isla
 - Tile: `https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png`
 - Marcadores con `L.divIcon` (`.marcador-sonoro`): 18px, relleno casi blanco
-  con stroke oscuro. El tamaño está en dos lados y tiene que coincidir — el
-  CSS y el `iconSize`/`iconAnchor` del `divIcon`, o el punto queda corrido
-  respecto a su coordenada
-- Hover y seleccionado comparten el mismo `transform: scale(1.2)` — hover no
-  se suma al de seleccionado, es el mismo valor
+  con stroke oscuro 1px. El tamaño está en dos lados y tiene que coincidir —
+  el CSS y el `iconSize`/`iconAnchor` del `divIcon`, o el punto queda
+  corrido respecto a su coordenada
+- 4 estados de marcador (todos con `box-sizing: border-box`, así que un
+  borde más grueso no cambia el tamaño total del punto):
+  - **Idle**: colores base
+  - **Hover** (`:hover`): mismos colores de idle, solo `scale(1.2)` más grande
+  - **Seleccionado** (`.selected`): el punto que se muestra en el panel
+    ahora — todo `#FE4734` (relleno y borde) + `scale(1.2)` + animación
+    ripple (`::before`/`::after`, keyframe `onda`). Es el único estado con
+    la onda
+  - **Mismo circuito** (`.mismo-circuito`): los demás puntos del circuito
+    que está abierto en el panel — relleno `#FFD7D3`, borde 2px `#FE4734`,
+    tamaño idle. Su variante hover solo agranda, no cambia color. Se
+    marca/limpia con `marcarMismoCircuito()` / `limpiarMismoCircuito()`
+    (expuestas en `window.MapaSonoroPanel`), llamadas desde
+    `mapa-circuitos.js` al abrir/salir de un circuito — no al navegar
+    dentro del mismo. `.selected` le gana a `.mismo-circuito` vía
+    `:not(.selected)`, porque el punto activo también pertenece a su
+    propio circuito y tiene ambas clases a la vez
 - Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
 - Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo

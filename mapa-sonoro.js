@@ -322,6 +322,26 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Destaca en el mapa a todos los puntos del circuito que está abierto
+    // en el panel (el propio seleccionado incluido — el CSS le da prioridad
+    // al estilo de `.selected` por encima del de `.mismo-circuito`).
+    function marcarMismoCircuito(circuitoId) {
+        limpiarMismoCircuito();
+        MapaSonoro.puntos.forEach(function (punto) {
+            if (punto.circuito_id !== circuitoId) return;
+            const marker = markersById[punto.id];
+            const el = marker && marker.getElement();
+            if (el) el.querySelector('.marcador-sonoro').classList.add('mismo-circuito');
+        });
+    }
+
+    function limpiarMismoCircuito() {
+        Object.values(markersById).forEach(function (marker) {
+            const el = marker.getElement();
+            if (el) el.querySelector('.marcador-sonoro').classList.remove('mismo-circuito');
+        });
+    }
+
     MapaSonoro.puntos.forEach(function (punto) {
         if (!punto.lat || !punto.lng) return;
 
@@ -359,6 +379,8 @@ document.addEventListener("DOMContentLoaded", function () {
         panelTituloSticky:   panelTituloSticky,
         centrarConOffset:    centrarConOffset,
         seleccionarMarcador: seleccionarMarcador,
+        marcarMismoCircuito: marcarMismoCircuito,
+        limpiarMismoCircuito: limpiarMismoCircuito,
         registrarAudio:      registrarAudio,
         crearBloqueVideo:    crearBloqueVideo,
         activarVideo:        activarVideo,

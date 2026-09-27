@@ -133,6 +133,10 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // No depende de la data del circuito (todavía no llegó): usa el
+        // manifest liviano, que ya tiene circuito_id por punto.
+        panelApi.marcarMismoCircuito(circuitoId);
+
         // El panel cerrado entra con una animación de 0.3s. Si el scroll se
         // calcula durante esa animación, mide sobre un panel más angosto
         // (el texto envuelve distinto) y queda desfasado.
@@ -173,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function salir() {
         circuitoActual = null;
+        panelApi.limpiarMismoCircuito();
     }
 
     window.MapaCircuitos = {
