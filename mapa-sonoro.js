@@ -186,7 +186,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Cablea el click de play de un bloque de video ya insertado en el DOM.
     // El archivo subido tiene prioridad sobre el link embebido si hay ambos.
-    function activarVideo(el, video) {
+    // `alTerminar` es opcional: se llama cuando el video termina de
+    // reproducirse. Solo aplica a video subido — un embed de YouTube/Vimeo
+    // vive en otro origen y no avisa cuándo termina.
+    function activarVideo(el, video, alTerminar) {
         if (!video) return;
 
         const boton = el.querySelector('.video-play');
@@ -203,6 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 media.controls  = true;
                 media.autoplay  = true;
                 media.src       = video.archivo;
+                if (alTerminar) media.addEventListener('ended', alTerminar);
             } else if (video.embed) {
                 const embed = parsearVideoEmbed(video.embed);
                 media = document.createElement('iframe');

@@ -73,7 +73,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const punto   = data.puntos.find(function (p) { return p.id === puntoId; });
             if (!punto) return;
 
-            panelApi.activarVideo(videoEl, punto.video);
+            panelApi.activarVideo(videoEl, punto.video, function () {
+                avanzarAlSiguiente(puntoId);
+            });
 
             const boton = videoEl.querySelector('.video-play');
             if (boton) {
