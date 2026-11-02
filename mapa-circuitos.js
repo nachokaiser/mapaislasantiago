@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
             audioEl.addEventListener('play', function () {
                 seleccionarPunto(Number(audioEl.dataset.puntoId), false);
             });
+            audioEl.addEventListener('ended', function () {
+                avanzarAlSiguiente(Number(audioEl.dataset.puntoId));
+            });
         });
 
         panelApi.panelContenido.querySelectorAll('.punto-video[data-punto-id]').forEach(function (videoEl) {
@@ -155,6 +158,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 panelApi.panelContenido.querySelector('.punto-video[data-punto-id="' + puntoId + '"]')
             );
         }
+    }
+
+    // Cuando termina el audio de un punto, pasa al siguiente del circuito (en
+    // el orden del backend) que tenga algo para reproducir: los que no tienen
+    // audio ni video se saltean. Si no queda ninguno, se frena ahí. Solo
+    // avanza si el punto que terminó sigue siendo el activo — si el usuario
+    // ya fue a otro, no le pisamos la navegación.
+    function avanzarAlSiguiente(puntoId) {
+        const data = cache[circuitoActual];
+        if (!data) return;
+
+        const activo = panelApi.panelContenido.querySelector('.punto-circuito-item.activo');
+        if (!activo || Number(activo.dataset.puntoId) !== puntoId) return;
+
+        const indice = data.puntos.findIndex(function (p) { return p.id === puntoId; });
+        if (indice === -1) return;
+
+        const siguiente = data.puntos.slice(indice + 1).find(function (p) {
+            return p.audio || (p.video && (p.video.archivo || p.video.embed));
+        });
+        if (siguiente) seleccionarPunto(siguiente.id);
     }
 
     function abrir(circuitoId, puntoSeleccionadoId) {
