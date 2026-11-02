@@ -246,6 +246,19 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 - Al soltar o clickear, actualiza los campos ACF `latitud` y `longitud`
 - Muestra otros puntos existentes como referencia (sin interacción)
 
+## Entorno local — clon de producción (Mac)
+
+- Sitio de Local: `Mapa Isla Santiago` (`~/Local Sites/mapa-isla-santiago`, URL `http://mapa-isla-santiago.local`), PHP 8.3.36, nginx, MySQL 8.4.
+- Es un **clon de producción** hecho el 01/11/2026: base `mapaisla_datos` (prefijo `wp_`, es la que dice `DB_NAME` en el `wp-config.php` de prod) exportada desde phpMyAdmin + `wp-content` comprimido desde el Administrador de archivos de cPanel. URLs reemplazadas de `https://mapaislasantiago.com` a la local con `wp search-replace`. Se loguea con el mismo usuario/contraseña que prod.
+- En prod existe además una base `mapaisla_wp_twxwo` (prefijo `i2XQY_`, blogname "Future Investments"): es un resto de instalador, **no se usa y no se toca**.
+- Este tema vive en `wp-content/themes/generatepress-child` (clon de git de `nachokaiser/mapaislasantiago`, rama `main`).
+
+### Regla innegociable: la base de producción no se toca
+- Se despliega **solo código**, por git (cPanel → Git Version Control → pull). Un pull cambia archivos del tema y nada más.
+- La base de datos local **jamás** se sube a prod, ni se importa nada en prod. Si hace falta volver a clonar, siempre en la dirección prod → local.
+- Lo único del tema que escribe en la base es `mapa_sonoro_sync_circuito_puntos()` y solo al guardar un circuito en el admin. Nada corre al activar/actualizar el tema.
+- Cualquier cambio que viva en la base (CPT de CPT UI, contenido, opciones) hay que replicarlo a mano en prod desde el admin — avisar explícitamente antes de hacerlo.
+
 ## Workflow de desarrollo
 
 - Desarrollar en Local by Flywheel (staging local)
