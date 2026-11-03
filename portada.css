@@ -1,0 +1,255 @@
+/* PORTADA
+   Línea de tiempo (todo arranca cuando JS agrega .is-playing, ya con las
+   imágenes decodificadas):
+     0.00s  isla verde, en fade
+     0.40s  ondas, de la del centro hacia afuera, una cada 0.09s
+     1.25s  piezas de alrededor: fade + desplazamiento hacia el centro
+     1.95s  título
+     2.40s  botón
+   Solo el papel está a la vista desde el principio. */
+
+:root {
+    --portada-azul: #0d249e;
+    --portada-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+
+    /* Qué tan grande se ve cada collage: 0 = entra entero en la pantalla (sobra
+       papel en los costados o arriba y abajo), 1 = cubre toda la pantalla (se
+       recorta lo que no entra). Son los números para ajustar. */
+    --portada-escala: 0.5;
+    --portada-escala-mobile: 0.5;
+
+    /* Ancho de cada escenario (lienzo del PSD de escritorio 1920×1371, del móvil
+       784×1371): punto intermedio entre "entero" y "cubriendo". */
+    --portada-w-desktop: calc(
+        min(100vw, calc(100dvh * 1920 / 1371))
+        + (max(100vw, calc(100dvh * 1920 / 1371)) - min(100vw, calc(100dvh * 1920 / 1371))) * var(--portada-escala)
+    );
+    --portada-w-mobile: calc(
+        min(100vw, calc(100dvh * 784 / 1371))
+        + (max(100vw, calc(100dvh * 784 / 1371)) - min(100vw, calc(100dvh * 784 / 1371))) * var(--portada-escala-mobile)
+    );
+}
+
+/* La decide un script en <head> (ya la vio en esta sesión): sin esto se vería
+   un destello de la portada antes de que cargue el JS. */
+html.sin-portada #portada {
+    display: none;
+}
+
+.portada {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    overflow: hidden;
+    isolation: isolate;
+    background: #ececec;
+    transition: opacity 0.45s ease;
+}
+
+.portada.is-saliendo {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.portada__papel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.portada__defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.portada__escenario {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* --portada-u: cuántos px de pantalla vale 1px del lienzo (lo usan las piezas
+   para saber cuánto desplazarse al entrar). */
+.portada__escenario--desktop {
+    width: var(--portada-w-desktop);
+    aspect-ratio: 1920 / 1371;
+    --portada-u: calc(var(--portada-w-desktop) / 1920);
+}
+
+.portada__escenario--mobile {
+    display: none;
+    width: var(--portada-w-mobile);
+    aspect-ratio: 784 / 1371;
+    --portada-u: calc(var(--portada-w-mobile) / 784);
+}
+
+/* Pantalla vertical (celular): se usa la composición del PSD móvil. El botón va
+   donde lo ubica ese PSD (centro a 1054px de 1371), relativo al escenario. */
+@media (max-aspect-ratio: 1/1) {
+    .portada__escenario--desktop {
+        display: none;
+    }
+
+    .portada__escenario--mobile {
+        display: block;
+    }
+
+    html .portada .portada__comenzar {
+        bottom: auto;
+        top: calc(50% + var(--portada-w-mobile) * 0.47);
+        translate: 0 -50%;
+    }
+}
+
+/* Las ondas son círculos vectoriales (así pueden seguir creciendo hasta
+   desbordar cualquier pantalla), pintados con un grano de tiza sacado del PSD.
+   Todas comparten el mismo centro, así que se expanden parejas. */
+.portada__ondas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    overflow: visible;
+}
+
+.portada__onda {
+    fill: none;
+    stroke: url(#portada-grano);
+    stroke-opacity: 0.29;
+    stroke-width: 7;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.portada__pieza {
+    position: absolute;
+    margin: 0;
+}
+
+.portada__pieza img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Misma mezcla que en el PSD: multiplicar al 50% sobre el papel. */
+.portada__pieza--isla-verde {
+    mix-blend-mode: multiply;
+}
+
+.portada__pieza--fade,
+.portada__pieza--entra,
+.portada__pieza--titulo {
+    opacity: 0;
+}
+
+/* Con .portada adelante para ganarle a los estilos de botón de GeneratePress. */
+.portada .portada__comenzar {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(16px, 4dvh, 64px);
+    transform: translateX(-50%);
+    min-width: 220px;
+    padding: 22px 40px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--portada-azul);
+    color: #fff;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.portada .portada__comenzar:hover {
+    background: #0a1c7d;
+}
+
+.portada .portada__comenzar:focus-visible {
+    outline: 3px solid var(--portada-azul);
+    outline-offset: 4px;
+}
+
+/* ---------- Animación ---------- */
+
+.portada.is-playing .portada__pieza--fade {
+    animation: portada-isla 0.5s ease both;
+}
+
+.portada.is-playing .portada__onda {
+    animation: portada-onda 0.5s var(--portada-ease) calc(0.4s + var(--i) * 0.08s) both;
+}
+
+.portada.is-playing .portada__pieza--entra {
+    animation: portada-entra 0.9s var(--portada-ease) 1.25s both;
+}
+
+.portada.is-playing .portada__pieza--titulo {
+    animation: portada-fade 0.6s ease 1.95s both;
+}
+
+.portada.is-playing .portada__comenzar {
+    animation: portada-boton 0.5s ease 2.4s both;
+}
+
+/* La isla termina en 0.5 porque se mezcla (multiplicar) al 50% sobre el papel. */
+@keyframes portada-isla {
+    from { opacity: 0; }
+    to   { opacity: 0.5; }
+}
+
+@keyframes portada-onda {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes portada-entra {
+    from {
+        opacity: 0;
+        transform: translate(calc(var(--dx) * var(--portada-u)), calc(var(--dy) * var(--portada-u)));
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes portada-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* El botón ya está centrado con translateX: la animación lo conserva. */
+@keyframes portada-boton {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Con "reducir movimiento" la portada aparece ya armada, sin animar. */
+@media (prefers-reduced-motion: reduce) {
+    .portada,
+    .portada * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .portada .portada__onda,
+    .portada .portada__pieza--entra,
+    .portada .portada__pieza--titulo,
+    .portada .portada__comenzar {
+        opacity: 1;
+    }
+
+    .portada .portada__pieza--isla-verde {
+        opacity: 0.5;
+    }
+}

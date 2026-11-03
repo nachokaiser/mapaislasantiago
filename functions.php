@@ -16,6 +16,8 @@ function mapa_sonoro_scripts() {
         // document, no necesita que existan de antemano.
         wp_enqueue_script('mapa-lightbox-js', get_stylesheet_directory_uri() . '/mapa-lightbox.js', [], null, true);
         wp_enqueue_style('mapa-sonoro-css', get_stylesheet_directory_uri() . '/mapa-sonoro.css');
+        wp_enqueue_style('portada-css', get_stylesheet_directory_uri() . '/portada.css');
+        wp_enqueue_script('portada-js', get_stylesheet_directory_uri() . '/portada.js', [], null, true);
 
         // Pasar solo los datos necesarios para los marcadores
         $puntos = get_posts(['post_type' => 'punto-sonoro', 'numberposts' => -1]);
