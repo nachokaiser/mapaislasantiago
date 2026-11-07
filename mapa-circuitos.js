@@ -211,7 +211,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (yaAbierto) {
-            if (puntoSeleccionadoId) seleccionarPunto(puntoSeleccionadoId);
+            if (puntoSeleccionadoId) {
+                seleccionarPunto(puntoSeleccionadoId);
+            } else {
+                // Viene del nav: se ve el circuito desde el principio.
+                panelApi.panelContenido.scrollTop = 0;
+            }
             return;
         }
 
@@ -232,6 +237,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (panelApi.panelTituloSticky) panelApi.panelTituloSticky.textContent = '';
         panelApi.panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
+        // Un circuito nuevo siempre arranca desde arriba (sin esto queda el
+        // scroll del circuito anterior).
+        panelApi.panelContenido.scrollTop = 0;
         panelApi.panel.classList.add('activo');
 
         const alTerminar = function (data) {
@@ -244,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 panelApi.panelTituloSticky.innerHTML = '<span class="panel-eyebrow">Circuito</span>' + data.titulo;
             }
             renderizar(data);
+            if (!puntoSeleccionadoId) panelApi.panelContenido.scrollTop = 0;
             seleccionarPunto(puntoSeleccionadoId);
 
             if (estabaCerrado) {
