@@ -73,7 +73,7 @@
 </div>
 
 <footer id="mapa-footer">
-    <p>Hecho por lxs pibxs y el Club Isleños Unidos de Isla Santiago, Argentina</p>
+    <p>Hecho en comunidad y coordinado por el Club Isleños Unidos en Isla Santiago, Argentina</p>
 </footer>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada" hidden>
