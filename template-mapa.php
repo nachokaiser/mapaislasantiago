@@ -29,14 +29,35 @@
         <?php endif; ?>
     </div>
 
-    <nav class="mapa-header-nav" aria-label="Navegación principal">
+    <nav class="mapa-header-nav" id="mapa-nav" aria-label="Navegación principal">
         <?php wp_nav_menu([
             'theme_location' => 'primary',
             'container'      => false,
             'menu_class'     => 'mapa-nav-list',
             'fallback_cb'    => false,
         ]); ?>
+
+        <?php // Un link por circuito, con su color principal. Al tocarlo, mapa-nav.js abre el panel del circuito. ?>
+        <ul class="mapa-nav-circuitos">
+            <?php foreach ( mapa_sonoro_circuitos_ordenados() as $circuito_nav ) :
+                $colores_nav = mapa_sonoro_colores_circuito( $circuito_nav ); ?>
+                <li>
+                    <a href="#circuito-<?php echo esc_attr( $circuito_nav->post_name ); ?>"
+                       class="mapa-nav-circuito"
+                       data-circuito-id="<?php echo (int) $circuito_nav->ID; ?>"
+                       <?php if ( $colores_nav['principal'] ) : ?>style="--c-principal:<?php echo esc_attr( $colores_nav['principal'] ); ?>;--c-texto:<?php echo esc_attr( $colores_nav['texto'] ); ?>"<?php endif; ?>>
+                        <?php echo esc_html( get_the_title( $circuito_nav ) ); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
     </nav>
+
+    <button type="button" class="mapa-nav-toggle" aria-expanded="false" aria-controls="mapa-nav" aria-label="Abrir menú de circuitos">
+        <span class="mapa-nav-toggle-barra"></span>
+        <span class="mapa-nav-toggle-barra"></span>
+        <span class="mapa-nav-toggle-barra"></span>
+    </button>
 </header>
 
 <div id="mapa-wrapper">
