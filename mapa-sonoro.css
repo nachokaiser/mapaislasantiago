@@ -28,6 +28,7 @@ body.mapa-page {
     border-bottom: 1px solid #eee;
     gap: 24px;
     z-index: 1001;
+    position: relative; /* ancla el menú desplegable del nav en pantallas angostas */
 }
 
 .mapa-header-logo a,
@@ -47,6 +48,113 @@ body.mapa-page {
 
 .mapa-header-nav {
     flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 32px;
+}
+
+/* NAV DE CIRCUITOS — un link por circuito, de su color principal (--c-principal
+   lo pone el template). Debajo de 1280px el nav no entra al lado del título y
+   pasa a un menú hamburguesa: ese es su propio breakpoint, distinto al de 720px
+   que usan el panel y el mapa. */
+.mapa-nav-circuitos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 32px;
+}
+
+#mapa-header .mapa-nav-circuito {
+    font-family: 'Alegreya Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: normal;
+    color: var(--c-texto, var(--c-principal, #333));
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+#mapa-header .mapa-nav-circuito:hover,
+#mapa-header .mapa-nav-circuito[aria-current] {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+#mapa-header .mapa-nav-circuito:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
+/* Botón hamburguesa: 3 barras que giran a una X. Solo en pantallas angostas. */
+#mapa-header .mapa-nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    margin: 0 -10px 0 auto;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.mapa-nav-toggle-barra {
+    display: block;
+    height: 2px;
+    background: #222;
+    border-radius: 1px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#mapa-header.menu-abierto .mapa-nav-toggle-barra:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+#mapa-header.menu-abierto .mapa-nav-toggle-barra:nth-child(2) {
+    opacity: 0;
+}
+#mapa-header.menu-abierto .mapa-nav-toggle-barra:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 1279px) {
+    #mapa-header .mapa-nav-toggle {
+        display: flex;
+    }
+
+    /* El menú se despliega debajo del header, pisando el mapa */
+    .mapa-header-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex: none;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 20px 16px;
+        background: #fff;
+        border-bottom: 1px solid #e6e6e6;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    #mapa-header.menu-abierto .mapa-header-nav {
+        display: flex;
+    }
+
+    .mapa-nav-circuitos {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    #mapa-header .mapa-nav-circuito {
+        display: block;
+        padding: 12px 0;
+        font-size: 18px;
+    }
 }
 
 .mapa-nav-list {
@@ -147,11 +255,17 @@ body.mapa-page {
     line-height: 1;
 }
 
-/* MARCADOR — 4 estados: idle, hover, seleccionado, mismo circuito (+ su
-   variante hover). `.mismo-circuito` se le pone a TODOS los puntos del
-   circuito abierto en el panel, seleccionado incluido — el `:not(.selected)`
-   de abajo es lo que le cede el paso al estilo de seleccionado cuando
-   ambas clases coinciden en el mismo punto. */
+/* MARCADOR — estados: idle, hover, seleccionado, y "circuito abierto".
+
+   Color: cada punto de un circuito lleva `.con-circuito` y dos variables
+   (--c-principal, --c-claro) que pone el JS con los colores de su circuito.
+     - idle: relleno claro + borde principal
+     - seleccionado: todo el color principal, y las ondas también
+     - circuito abierto en el panel: el contenedor del mapa lleva
+       `.circuito-abierto` y los puntos de los demás circuitos pasan a blanco
+       con borde oscuro (siguen siendo clickeables). `.mismo-circuito` marca a
+       los del circuito abierto; no cambia el aspecto, solo sirve de contraste.
+   Los puntos sin circuito siempre son blancos con borde oscuro. */
 .marcador-sonoro {
     box-sizing: border-box;
     width: 18px;
@@ -165,28 +279,28 @@ body.mapa-page {
     transition: transform 0.15s ease, background 0.15s, border-color 0.15s;
 }
 
+.marcador-sonoro.con-circuito {
+    background: var(--c-claro);
+    border-color: var(--c-principal);
+}
+
 /* Hover puro: los mismos colores de idle, solo cambia el tamaño */
 .marcador-sonoro:hover {
     transform: scale(1.2);
 }
 
-/* Seleccionado: el punto que se está mostrando en el panel ahora mismo */
+/* Seleccionado: el punto que se está mostrando en el panel ahora mismo. Sin
+   circuito (o sin color) usa el rojo de siempre. */
 .marcador-sonoro.selected {
     transform: scale(1.2);
-    background: #FE4734;
-    border-color: #FE4734;
+    background: var(--c-principal, #333);
+    border-color: var(--c-principal, #333);
 }
 
-/* Mismo circuito (idle): puntos del circuito abierto, sin ser el activo */
-.marcador-sonoro.mismo-circuito:not(.selected) {
-    background: #FFD7D3;
-    border-color: #FE4734;
-    border-width: 2px;
-}
-
-/* Mismo circuito + hover: mismo color de arriba, solo cambia el tamaño */
-.marcador-sonoro.mismo-circuito:not(.selected):hover {
-    transform: scale(1.2);
+/* Circuito abierto: los puntos de los otros circuitos vuelven al estilo base */
+.circuito-abierto .marcador-sonoro.con-circuito:not(.mismo-circuito):not(.selected) {
+    background: #f7f7f5;
+    border-color: #3a3a3a;
 }
 
 .marcador-sonoro::before,
@@ -201,16 +315,19 @@ body.mapa-page {
     pointer-events: none;
 }
 
-/* La onda es exclusiva del seleccionado — ni el hover simple ni el de
-   "mismo circuito" la llevan. */
+/* La onda es exclusiva del seleccionado y toma el color principal de su
+   circuito (el primer border-color es el respaldo para navegadores sin
+   color-mix). */
 .marcador-sonoro.selected::before {
     width: 34px; height: 34px;
-    border-color: rgba(254, 71, 52, 0.5);
+    border-color: rgba(51, 51, 51, 0.5);
+    border-color: color-mix(in srgb, var(--c-principal, #333) 50%, transparent);
     animation: onda 2s ease-out infinite;
 }
 .marcador-sonoro.selected::after {
     width: 50px; height: 50px;
-    border-color: rgba(254, 71, 52, 0.5);
+    border-color: rgba(51, 51, 51, 0.5);
+    border-color: color-mix(in srgb, var(--c-principal, #333) 50%, transparent);
     animation: onda 2s ease-out infinite 0.6s;
 }
 
@@ -221,10 +338,6 @@ body.mapa-page {
 
 /* MOBILE */
 @media (max-width: 720px) {
-    .mapa-header-nav {
-        display: none;
-    }
-
     #mapa-panel {
         position: fixed;
         bottom: -100%;
@@ -337,7 +450,7 @@ body.mapa-page {
        recalcular esto. */
     left: 18px;
     width: 2px;
-    background: #B0B0B0;
+    background: color-mix(in srgb, var(--c-principal, #B0B0B0) 45%, #fff);
     z-index: 1;
     pointer-events: none;
 }
@@ -363,7 +476,7 @@ body.mapa-page {
 }
 
 .punto-circuito-item.activo {
-    border-color: #FE4734;
+    border-color: var(--c-principal, #333);
 }
 
 /* Fondo del hover en su propia capa. Para un punto SIN seleccionar, va
@@ -389,7 +502,7 @@ body.mapa-page {
    pasar el mouse) — el hover en sí no cambia para un punto ya seleccionado. */
 .punto-circuito-item:hover::before,
 .punto-circuito-item.activo::before {
-    background: #f8f8f8;
+    background: color-mix(in srgb, var(--c-claro, #eee) 40%, #fff);
 }
 
 /* El punto: chico y gris cuando no está seleccionado, más grande y del
@@ -402,7 +515,9 @@ body.mapa-page {
     height: 10px;
     margin-top: 6px;
     border-radius: 50%;
-    background: #B0B0B0;
+    box-sizing: border-box;
+    background: var(--c-claro, #B0B0B0);
+    border: 2px solid var(--c-principal, #B0B0B0);
     position: relative;
     z-index: 3;
     /* Escala en vez de cambiar width/height: así el centro del punto no se
@@ -413,7 +528,7 @@ body.mapa-page {
 }
 
 .punto-circuito-item.activo .punto-circuito-numero {
-    background: #FE4734;
+    background: var(--c-principal, #333);
     transform: scale(1.6);
 }
 
@@ -437,7 +552,7 @@ body.mapa-page {
 }
 
 .punto-circuito-item.activo .punto-circuito-titulo {
-    color: #FE4734;
+    color: var(--c-texto, var(--c-principal, #333));
 }
 
 /* VIDEO: placeholder + reproductor on-demand */

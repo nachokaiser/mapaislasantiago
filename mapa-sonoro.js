@@ -94,6 +94,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Límites de movimiento del mapa por defecto (los mismos de mapConfig)
+    const limitesBase = L.latLngBounds(mapConfig.maxBounds);
+
+    function restaurarLimites() {
+        map.setMaxBounds(limitesBase);
+    }
+
+    // Encuadra un grupo de puntos en la parte del mapa que el panel no tapa:
+    // en desktop el panel (450px) se abre a la derecha; en mobile es una hoja
+    // que ocupa hasta el 60% de abajo. Sirve para abrir un circuito desde el
+    // nav, donde no hay un punto puntual al que centrar.
+    function encuadrarPuntos(puntos) {
+        if (!puntos.length) return;
+
+        const esDesktop = window.innerWidth > 720;
+        const bounds    = L.latLngBounds(puntos.map(function (p) { return [p.lat, p.lng]; }));
+
+        // Los puntos están cerca del borde de los límites del mapa (maxBounds):
+        // sin más margen, Leaflet no deja correrlos hacia la parte que el panel
+        // no tapa (y en mobile, donde el circuito entra recién con el zoom
+        // mínimo, el mapa visible es más grande que los límites y queda
+        // clavado en el centro). Se amplían mientras el circuito está abierto.
+        map.setMaxBounds(limitesBase.pad(1.5));
+
+        map.fitBounds(bounds, {
+            paddingTopLeft:     [40, 40],
+            paddingBottomRight: esDesktop ? [450 + 40, 40] : [40, window.innerHeight * 0.6 + 20],
+            maxZoom:            16,
+            animate:            true,
+            duration:           0.6
+        });
+    }
+
     // Corta el video que esté reproduciéndose. Un <video> se pausa; un
     // embed de YouTube/Vimeo no se puede pausar desde afuera (es otro
     // origen), así que se saca del DOM — que es lo que lo detiene.
@@ -107,6 +140,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         window.videoActivo = null;
+    }
+
+    // Corta lo que esté sonando: el audio y el video activos.
+    function detenerMedios() {
+        if (window.audioActual) {
+            window.audioActual.pause();
+            window.audioActual = null;
+        }
+        detenerVideoActivo();
     }
 
     // Un solo medio sonando a la vez en todo el panel: arrancar un audio
@@ -296,10 +338,26 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Ícono custom
-    function crearIcono() {
+    // Colores de cada circuito, por id (vienen del manifest de PHP). El punto
+    // los toma como variables CSS: el CSS decide cuál usar según el estado.
+    const circuitoPorId = {};
+    MapaSonoro.circuitos.forEach(function (circuito) {
+        circuitoPorId[circuito.id] = circuito;
+    });
+
+    // Ícono custom. Un punto de un circuito con color lleva `con-circuito` y
+    // sus dos colores; uno sin circuito (o de un circuito sin color) queda
+    // con el estilo base, blanco con borde oscuro.
+    function crearIcono(punto) {
+        const circuito = punto.circuito_id ? circuitoPorId[punto.circuito_id] : null;
+        const conColor = circuito && circuito.color && circuito.color_claro;
+        const clase    = conColor ? 'marcador-sonoro con-circuito' : 'marcador-sonoro';
+        const estilo   = conColor
+            ? ' style="--c-principal:' + circuito.color + ';--c-claro:' + circuito.color_claro + '"'
+            : '';
+
         return L.divIcon({
-            html: '<div class="marcador-sonoro"></div>',
+            html: '<div class="' + clase + '"' + estilo + '></div>',
             className: '',
             iconSize: [18, 18],
             iconAnchor: [9, 9]
@@ -323,14 +381,20 @@ document.addEventListener("DOMContentLoaded", function () {
             const el = marker.getElement();
             if (el) el.querySelector('.marcador-sonoro').classList.add('selected');
             marcadorActivo = marker;
+        } else {
+            // Sin punto (ej. se abrió un circuito desde el nav): nada queda
+            // seleccionado.
+            marcadorActivo = null;
         }
     }
 
     // Destaca en el mapa a todos los puntos del circuito que está abierto
-    // en el panel (el propio seleccionado incluido — el CSS le da prioridad
-    // al estilo de `.selected` por encima del de `.mismo-circuito`).
+    // en el panel (el propio seleccionado incluido). El contenedor del mapa
+    // lleva `circuito-abierto` mientras tanto: el CSS usa esa clase para
+    // pasar a blanco los puntos de los demás circuitos.
     function marcarMismoCircuito(circuitoId) {
         limpiarMismoCircuito();
+        map.getContainer().classList.add('circuito-abierto');
         MapaSonoro.puntos.forEach(function (punto) {
             if (punto.circuito_id !== circuitoId) return;
             const marker = markersById[punto.id];
@@ -340,6 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function limpiarMismoCircuito() {
+        map.getContainer().classList.remove('circuito-abierto');
         Object.values(markersById).forEach(function (marker) {
             const el = marker.getElement();
             if (el) el.querySelector('.marcador-sonoro').classList.remove('mismo-circuito');
@@ -350,7 +415,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!punto.lat || !punto.lng) return;
 
         const marker = L.marker([punto.lat, punto.lng], {
-            icon: crearIcono()
+            icon: crearIcono(punto)
         }).addTo(map);
 
         markersById[punto.id] = marker;
@@ -386,6 +451,9 @@ document.addEventListener("DOMContentLoaded", function () {
         marcarMismoCircuito: marcarMismoCircuito,
         limpiarMismoCircuito: limpiarMismoCircuito,
         registrarAudio:      registrarAudio,
+        detenerMedios:       detenerMedios,
+        encuadrarPuntos:     encuadrarPuntos,
+        restaurarLimites:    restaurarLimites,
         crearBloqueVideo:    crearBloqueVideo,
         activarVideo:        activarVideo,
         reproducirMedio:     reproducirMedio

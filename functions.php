@@ -5,6 +5,51 @@ function my_child_theme_enqueue_styles() {
 }
 
 
+// Color de cada circuito (diseño de Figma): `principal` es el del borde del
+// punto, el relleno del seleccionado, las ondas y el nombre del circuito en el
+// nav; `claro` es el relleno del punto sin seleccionar. Va por slug y vive en
+// el código a propósito: así un deploy lo trae solo, sin tocar la base de
+// producción. Un circuito nuevo sin entrada acá no tiene color (null) y sus
+// puntos se ven como los que no pertenecen a ningún circuito.
+function mapa_sonoro_paleta_circuitos() {
+    // El orden de esta lista es también el orden del nav (el de Figma).
+    return [
+        // principal: puntos, tarjetas, ondas. claro: relleno en reposo.
+        // texto: versión más oscura del principal, para letra sobre blanco
+        // (el principal solo no llega a 4,5:1 de contraste en todos los casos).
+        'del-barco-al-barquito' => [ 'principal' => '#8A3FE0', 'claro' => '#E8D8FB', 'texto' => '#8A3FE0' ],
+        'por-los-pasillos'      => [ 'principal' => '#F2540A', 'claro' => '#FFDCC6', 'texto' => '#C44500' ],
+        'el-porton-misterioso'  => [ 'principal' => '#2F6BFF', 'claro' => '#CFE0FF', 'texto' => '#2159E0' ],
+        'en-el-rio'             => [ 'principal' => '#F0428A', 'claro' => '#FFD3E6', 'texto' => '#D81B72' ],
+        'camino-a-la-playita'   => [ 'principal' => '#0F9E82', 'claro' => '#C4F2E6', 'texto' => '#0A7F68' ],
+        // Reserva para un sexto circuito (amarillo; el borde necesita ser oscuro):
+        // 'principal' => '#B07C00', 'claro' => '#FFEFB3', 'texto' => '#8A6100'
+    ];
+}
+
+function mapa_sonoro_colores_circuito($circuito_post) {
+    $paleta = mapa_sonoro_paleta_circuitos();
+
+    return isset($paleta[$circuito_post->post_name])
+        ? $paleta[$circuito_post->post_name]
+        : [ 'principal' => null, 'claro' => null, 'texto' => null ];
+}
+
+// Los circuitos, en el orden del nav: primero los que tienen color (en el orden
+// de la paleta), después cualquier otro por fecha.
+function mapa_sonoro_circuitos_ordenados() {
+    $circuitos = get_posts(['post_type' => 'circuito-sonoro', 'numberposts' => -1]);
+    $orden     = array_flip(array_keys(mapa_sonoro_paleta_circuitos()));
+
+    usort($circuitos, function ($a, $b) use ($orden) {
+        $pa = isset($orden[$a->post_name]) ? $orden[$a->post_name] : 999;
+        $pb = isset($orden[$b->post_name]) ? $orden[$b->post_name] : 999;
+        return $pa <=> $pb;
+    });
+
+    return $circuitos;
+}
+
 // Cargar Leaflet y el mapa sonoro
 function mapa_sonoro_scripts() {
     if ( is_page('mapa') ) {
@@ -16,6 +61,9 @@ function mapa_sonoro_scripts() {
         // document, no necesita que existan de antemano.
         wp_enqueue_script('mapa-lightbox-js', get_stylesheet_directory_uri() . '/mapa-lightbox.js', [], null, true);
         wp_enqueue_style('mapa-sonoro-css', get_stylesheet_directory_uri() . '/mapa-sonoro.css');
+        // Tipografía de los links de circuitos del nav (diseño de Figma)
+        wp_enqueue_style('mapa-fuentes', 'https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@700&display=swap', [], null);
+        wp_enqueue_script('mapa-nav-js', get_stylesheet_directory_uri() . '/mapa-nav.js', ['mapa-circuitos-js'], null, true);
         wp_enqueue_style('portada-css', get_stylesheet_directory_uri() . '/portada.css');
         wp_enqueue_script('portada-js', get_stylesheet_directory_uri() . '/portada.js', [], null, true);
 
@@ -36,13 +84,17 @@ function mapa_sonoro_scripts() {
         }
 
         // Manifest liviano de circuitos (sin trazo ni puntos, eso se pide on-demand)
-        $circuitos_posts = get_posts(['post_type' => 'circuito-sonoro', 'numberposts' => -1]);
+        $circuitos_posts = mapa_sonoro_circuitos_ordenados();
         $circuitos_data  = [];
         foreach ($circuitos_posts as $circuito_post) {
+            $colores = mapa_sonoro_colores_circuito($circuito_post);
+
             $circuitos_data[] = [
-                'id'     => $circuito_post->ID,
-                'titulo' => get_the_title($circuito_post->ID),
-                'color'  => get_field('color_circuito', $circuito_post->ID) ?: null,
+                'id'          => $circuito_post->ID,
+                'titulo'      => get_the_title($circuito_post->ID),
+                'color'       => $colores['principal'],
+                'color_claro' => $colores['claro'],
+                'color_texto' => $colores['texto'],
             ];
         }
 

@@ -40,7 +40,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderizar(data) {
-        let html = '<div class="circuito-detalle">';
+        // Las tarjetas y la línea toman el color del circuito (variables CSS).
+        const meta = (MapaSonoro.circuitos || []).find(function (c) { return c.id === circuitoActual; });
+        const estilo = meta && meta.color
+            ? ' style="--c-principal:' + meta.color + ';--c-claro:' + meta.color_claro + ';--c-texto:' + meta.color_texto + '"'
+            : '';
+        let html = '<div class="circuito-detalle"' + estilo + '>';
 
         // El título ya se muestra en la barra sticky del panel (arriba de
         // todo); acá solo va la descripción, si hay.
@@ -183,15 +188,38 @@ document.addEventListener('DOMContentLoaded', function () {
         if (siguiente) seleccionarPunto(siguiente.id);
     }
 
+    // Avisa qué circuito está abierto (o null si se cerró): el nav lo usa para
+    // marcar su link.
+    function avisarCircuito(id) {
+        document.dispatchEvent(new CustomEvent('mapa:circuito', { detail: { id: id } }));
+    }
+
+    // `puntoSeleccionadoId` es opcional: el nav abre el circuito sin elegir
+    // ningún punto.
     function abrir(circuitoId, puntoSeleccionadoId) {
         // ¿Ya está abierto este mismo circuito? Solo navegar, sin recargar.
         const yaAbierto = circuitoActual === circuitoId && cache[circuitoId];
         circuitoActual = circuitoId;
+        avisarCircuito(circuitoId);
+
+        // Sin punto elegido (viene del nav): el mapa se acomoda para que se vea
+        // el circuito entero, no solo detrás del panel.
+        if (!puntoSeleccionadoId) {
+            panelApi.encuadrarPuntos(MapaSonoro.puntos.filter(function (p) {
+                return p.circuito_id === circuitoId && p.lat && p.lng;
+            }));
+        }
 
         if (yaAbierto) {
-            seleccionarPunto(puntoSeleccionadoId);
+            if (puntoSeleccionadoId) seleccionarPunto(puntoSeleccionadoId);
             return;
         }
+
+        // Circuito nuevo: se corta lo que sonaba del anterior (si el usuario
+        // viene del nav no hay un punto nuevo que arranque y lo reemplace) y
+        // no queda ningún punto seleccionado hasta que se elija uno.
+        panelApi.detenerMedios();
+        panelApi.seleccionarMarcador(null);
 
         // No depende de la data del circuito (todavía no llegó): usa el
         // manifest liviano, que ya tiene circuito_id por punto.
@@ -244,6 +272,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function salir() {
         circuitoActual = null;
+        avisarCircuito(null);
+        panelApi.restaurarLimites();
         panelApi.limpiarMismoCircuito();
     }
 
