@@ -19,8 +19,8 @@ function mapa_sonoro_paleta_circuitos() {
         // (el principal solo no llega a 4,5:1 de contraste en todos los casos).
         'del-barco-al-barquito' => [ 'principal' => '#8A3FE0', 'claro' => '#E8D8FB', 'texto' => '#8A3FE0' ],
         'por-los-pasillos'      => [ 'principal' => '#F2540A', 'claro' => '#FFDCC6', 'texto' => '#C44500' ],
-        'el-porton-misterioso'  => [ 'principal' => '#F0428A', 'claro' => '#FFD3E6', 'texto' => '#D81B72' ],
-        'en-el-rio'             => [ 'principal' => '#2F6BFF', 'claro' => '#CFE0FF', 'texto' => '#2159E0' ],
+        'el-porton-misterioso'  => [ 'principal' => '#2F6BFF', 'claro' => '#CFE0FF', 'texto' => '#2159E0' ],
+        'en-el-rio'             => [ 'principal' => '#F0428A', 'claro' => '#FFD3E6', 'texto' => '#D81B72' ],
         'camino-a-la-playita'   => [ 'principal' => '#0F9E82', 'claro' => '#C4F2E6', 'texto' => '#0A7F68' ],
         // Reserva para un sexto circuito (amarillo; el borde necesita ser oscuro):
         // 'principal' => '#B07C00', 'claro' => '#FFEFB3', 'texto' => '#8A6100'
