@@ -450,7 +450,7 @@ body.mapa-page {
        recalcular esto. */
     left: 18px;
     width: 2px;
-    background: color-mix(in srgb, var(--c-principal, #B0B0B0) 45%, #fff);
+    background: #B0B0B0;
     z-index: 1;
     pointer-events: none;
 }
@@ -502,7 +502,7 @@ body.mapa-page {
    pasar el mouse) — el hover en sí no cambia para un punto ya seleccionado. */
 .punto-circuito-item:hover::before,
 .punto-circuito-item.activo::before {
-    background: color-mix(in srgb, var(--c-claro, #eee) 40%, #fff);
+    background: #f8f8f8;
 }
 
 /* El punto: chico y gris cuando no está seleccionado, más grande y del
@@ -516,8 +516,7 @@ body.mapa-page {
     margin-top: 6px;
     border-radius: 50%;
     box-sizing: border-box;
-    background: var(--c-claro, #B0B0B0);
-    border: 2px solid var(--c-principal, #B0B0B0);
+    background: #B0B0B0;
     position: relative;
     z-index: 3;
     /* Escala en vez de cambiar width/height: así el centro del punto no se
