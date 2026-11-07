@@ -235,7 +235,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // (el texto envuelve distinto) y queda desfasado.
         const estabaCerrado = !panelApi.panel.classList.contains('activo');
 
-        if (panelApi.panelTituloSticky) panelApi.panelTituloSticky.textContent = '';
+        if (panelApi.panelTituloSticky) {
+            panelApi.panelTituloSticky.textContent = '';
+            panelApi.panelTituloSticky.style.removeProperty('--c-texto');
+        }
         panelApi.panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
         // Un circuito nuevo siempre arranca desde arriba (sin esto queda el
         // scroll del circuito anterior).
@@ -250,6 +253,9 @@ document.addEventListener('DOMContentLoaded', function () {
             cache[circuitoId] = data;
             if (panelApi.panelTituloSticky) {
                 panelApi.panelTituloSticky.innerHTML = '<span class="panel-eyebrow">Circuito</span>' + data.titulo;
+                // El título lleva el color del circuito (versión legible sobre blanco).
+                const meta = (MapaSonoro.circuitos || []).find(function (c) { return c.id === circuitoId; });
+                if (meta && meta.color_texto) panelApi.panelTituloSticky.style.setProperty('--c-texto', meta.color_texto);
             }
             renderizar(data);
             if (!puntoSeleccionadoId) panelApi.panelContenido.scrollTop = 0;
