@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function cerrarPanel() {
         panel.classList.remove('activo');
-        if (panelTituloSticky) panelTituloSticky.textContent = '';
+        if (panelTituloSticky) { panelTituloSticky.textContent = ''; panelTituloSticky.style.removeProperty('--c-texto'); }
         if (window.audioActual) {
             window.audioActual.pause();
         }
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderizarPanel(data) {
-        if (panelTituloSticky) panelTituloSticky.textContent = data.titulo;
+        if (panelTituloSticky) { panelTituloSticky.textContent = data.titulo; panelTituloSticky.style.removeProperty('--c-texto'); }
 
         let html = '<div class="punto-detalle">';
 
