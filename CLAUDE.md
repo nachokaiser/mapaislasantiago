@@ -25,6 +25,11 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
 - `mapa-lightbox.js` — Lightbox de fotos (click en `.punto-imagen` la abre
   en pantalla completa). Independiente de los otros dos: usa delegación de
   eventos en `document`, no depende de cuándo/dónde se insertan las fotos
+- `mapa-nav.js` — Nav de circuitos del header (links + menú hamburguesa).
+  Depende de `mapa-circuitos.js`: al tocar un link llama a
+  `MapaCircuitos.abrir(id)`
+- `portada.php` / `portada.css` / `portada.js` — Pantalla de portada con
+  collage animado (una vez por sesión, ver "Portada")
 - `acf-json/` — Field groups de ACF (Local JSON). Los CPT NO viven acá: se
   crean con CPT UI y se guardan en la base de datos de cada entorno
 
@@ -76,7 +81,8 @@ ACF resuelve las escrituras programáticas de forma más confiable por key.
 
 ```js
 MapaSonoro.puntos          // array: { id, titulo, lat, lng, circuito_id }
-MapaSonoro.circuitos       // array: { id, titulo, color }
+MapaSonoro.circuitos       // array: { id, titulo, color, color_claro, color_texto }
+                           // (colores de la paleta en código, ver "Colores por circuito")
 MapaSonoro.restUrl         // base URL del endpoint REST de punto
 MapaSonoro.restUrlCircuito // base URL del endpoint REST de circuito
 ```
@@ -94,7 +100,9 @@ donde `puntos` respeta el orden de `puntos_del_circuito` y cada uno trae
 El orden se preserva porque se lee directo del array de ACF. Si alguna vez se
 pasa por `WP_Query`, hay que incluir `'orderby' => 'post__in'` o el orden se pierde.
 
-Nota: `color` viene `null` — el campo `color_circuito` todavía no existe en ACF.
+Nota: `color` de este endpoint viene `null` — el color de cada circuito NO
+sale de ACF sino de la paleta en código (`mapa_sonoro_paleta_circuitos()`,
+ver "Colores por circuito"); el JS lo toma de `MapaSonoro.circuitos`.
 
 `GET /wp-json/mapa-sonoro/v1/circuito/{id}` también trae, por cada punto,
 su detalle completo (`descripcion`, `audio`, `video`, `imagen`) — una sola
@@ -117,13 +125,30 @@ el bloque en el panel, o el reproductor de audio) nunca cierra el panel;
 sí lo hace tocar un punto de otro circuito o uno suelto.
 
 - El título del panel lleva un eyebrow "Circuito" arriba (`.panel-eyebrow`,
-  solo cuando el panel muestra un circuito, no en un punto suelto).
+  gris, solo cuando el panel muestra un circuito, no en un punto suelto).
+  El título en sí va a **24px** y con el **color de texto del circuito**
+  (`--c-texto`, que `mapa-circuitos.js` pone sobre `#panel-titulo-sticky` y
+  `mapa-sonoro.js` saca al mostrar un punto suelto — ahí vuelve a negro).
+  Vale para el side panel y el bottom sheet (es el mismo elemento).
+- **Scroll al abrir desde el nav:** abrir un circuito sin elegir punto
+  (`abrir(id)` sin segundo parámetro) deja siempre `#panel-contenido` en
+  `scrollTop = 0`, sea un circuito nuevo, el mismo ya abierto, o con un
+  punto seleccionado. Es un salto directo, sin `smooth` (el scroll suave
+  no se pudo probar en el navegador de pruebas).
+- Las tarjetas y la línea toman el color del circuito vía variables CSS
+  que `renderizar()` pone en `.circuito-detalle` (`--c-principal`,
+  `--c-claro`, `--c-texto`). Ojo: se pidió que sea **sutil** — el color vive
+  solo en el borde de la tarjeta activa, el bullet seleccionado y el título.
+  El fondo de la tarjeta/hover sigue siendo `#f8f8f8`, la línea y los
+  bullets en reposo siguen grises (la primera versión los teñía y se
+  revirtió por exceso de color).
 - Los puntos ya no muestran su número en el front (`data-orden` lo guarda
   igual por si hace falta después) — el orden real sigue viniendo del
   backend en `data.puntos`. Cada punto es un bullet (`.punto-circuito-numero`,
-  10px gris `#B0B0B0` / 16px `#FE4734` cuando está seleccionado, vía
-  `transform: scale()` para no correr el centro entre estados) + título
-  (mismo acento cuando seleccionado, gris `#4b5563` si no).
+  10px gris `#B0B0B0` / 16px del color principal del circuito cuando está
+  seleccionado, vía `transform: scale()` para no correr el centro entre
+  estados) + título (color de texto del circuito cuando seleccionado, gris
+  `#4b5563` si no).
 - Una línea (`.circuito-linea`, `#B0B0B0`) atraviesa todos los puntos del
   feed, del primero al último. La dibuja `dibujarLineaCircuito()` en JS
   porque el alto entre un punto y el siguiente depende del contenido real
@@ -134,7 +159,7 @@ sí lo hace tocar un punto de otro circuito o uno suelto.
   animarse (si estaba cerrado), igual que el scroll.
 - Punto seleccionado (`.activo`): además del bullet/título en acento, la
   card entera lleva el fondo del hover de forma persistente + un borde de
-  2px `#FE4734` alrededor. El borde vive siempre (transparente cuando no
+  2px del color principal del circuito alrededor. El borde vive siempre (transparente cuando no
   está seleccionado) para que activar/desactivar un punto no reacomode el
   layout.
 - Capas del feed (de atrás para adelante): fondo del hover en un punto sin
@@ -182,6 +207,93 @@ delegación de eventos en `document`, no hace falta cablear cada imagen.
   simple (el único control interno es el botón cerrar, así que Tab
   siempre vuelve ahí).
 
+## Colores por circuito
+
+La paleta vive **en código**, no en la base de datos: `mapa_sonoro_paleta_circuitos()`
+en `functions.php`, indexada por slug del circuito. El orden de esa lista es
+también el orden del nav. Cada circuito tiene tres colores:
+- `principal`: puntos, ondas, borde y bullet de la tarjeta activa
+- `claro`: relleno de los puntos en reposo
+- `texto`: versión más oscura del principal, para letra sobre blanco (nav y
+  título del panel) — el principal solo no llega a 4,5:1 de contraste en
+  todos los casos
+
+| Circuito (slug) | principal | claro | texto |
+| --- | --- | --- | --- |
+| `del-barco-al-barquito` | `#8A3FE0` | `#E8D8FB` | `#8A3FE0` |
+| `por-los-pasillos` | `#F2540A` | `#FFDCC6` | `#D44700` |
+| `el-porton-misterioso` | `#2F6BFF` | `#CFE0FF` | `#2159E0` |
+| `en-el-rio` | `#F0428A` | `#FFD3E6` | `#D81B72` |
+| `camino-a-la-playita` | `#0F9E82` | `#C4F2E6` | `#0A7F68` |
+
+- "En el río" (rosa) y "El portón misterioso" (azul) se **intercambiaron a
+  propósito**: el azul de En el río se mimetizaba con el agua del mapa.
+- Naranja y verde están ajustados para que el borde pase 3:1 de contraste.
+- **Amarillo**: reservado para un sexto circuito, pero NO sobre blanco con el
+  tono vivo (`#F5B800` da ~1,7:1). Versión usable anotada en un comentario de
+  la paleta: `#B07C00` / `#FFEFB3` / `#8A6100`.
+- Un circuito cuyo slug no esté en la paleta no tiene color (`null`): sus
+  puntos quedan blancos con borde oscuro y su link de nav sin color. Si se
+  suma un circuito, hay que agregarlo a la paleta (en código).
+- Si algún día se quiere editar desde el admin, el camino es un campo ACF
+  `color_circuito` (no existe hoy).
+
+## Nav de circuitos (header)
+
+`template-mapa.php` renderiza, dentro de `#mapa-nav`, un link por circuito
+(`.mapa-nav-circuito`, con `data-circuito-id` y `--c-principal`/`--c-texto`
+inline), en el orden de la paleta. `mapa-nav.js`:
+- click → `preventDefault()` + cierra el menú + `MapaCircuitos.abrir(id)`:
+  abre el panel del circuito **sin seleccionar ningún punto**, encuadra el
+  circuito en el mapa y corta el audio/video del circuito anterior
+- escucha el evento `mapa:circuito` (lo dispara `mapa-circuitos.js` al
+  abrir/cerrar) para marcar el link activo con `aria-current="true"` (subrayado)
+- menú hamburguesa (`.mapa-nav-toggle`, a la derecha): se abre/cierra con el
+  botón, Esc o un toque afuera; `aria-expanded` y `aria-label` se actualizan
+
+**Breakpoints**: la hamburguesa aparece por debajo de **1279px** (el nav no
+entra al lado del título más abajo; a 1280px entra con ~116px de aire). El
+resto del layout (side panel vs. bottom sheet) sigue cortando en 720px
+(`esMobile = innerWidth <= 720`). Son dos breakpoints distintos a propósito.
+
+**Encuadre del mapa** (`encuadrarPuntos()` en `mapa-sonoro.js`): al abrir un
+circuito sin punto, `fitBounds` con padding que esquiva el panel (desktop:
+derecha 450px + margen; mobile: abajo ~60% del alto). Para que `maxBounds`
+no lo corte, mientras el circuito está abierto se amplía con
+`setMaxBounds(limitesBase.pad(1.5))`; `restaurarLimites()` lo devuelve al
+cerrar (`salir()`).
+
+**Los links del nav NO se agrandaron** con el resto del texto: 16px en
+desktop, 18px en el menú hamburguesa (excepción explícita a la regla de +2px).
+
+## Tipografía
+
+**Alegreya Sans** en todo el mapa (Google Fonts, pesos 400/500/700/800 y
+cursivas, encolada en `functions.php` con el handle `mapa-fuentes`). Se aplica
+en `body.mapa-page` y se repite en `button`, `input`, `select`, `textarea` y
+`.leaflet-container` porque esos no heredan la fuente. No tiene peso 600.
+Se ve más chica que la fuente anterior, por eso: base de `body.mapa-page`
+en **19px** (GeneratePress da 17px) y todos los `font-size` explícitos de
+`mapa-sonoro.css`/`portada.css` subieron +2px, salvo los links del nav (ver
+arriba) y los íconos ✕ (`#panel-cerrar`, `.lightbox-cerrar`, 20px). El
+título del circuito en el panel es 24px. El `<h1>` de la portada no se tocó.
+
+## Portada
+
+Pantalla de entrada con un collage animado (versiones desktop y mobile,
+`portada.php` + `portada.css` + `portada.js`), se muestra **una vez por
+sesión** (`sessionStorage.portadaVista`). Un script inline en el `<head>` de
+`template-mapa.php` agrega la clase `sin-portada` a `<html>` antes del primer
+dibujado si ya se vio, para que no parpadee. Mientras está arriba, header,
+mapa y footer están `inert`.
+
+- ⚠️ Bug ya corregido (PR #4): si la portada ya se había visto, el CSS la
+  ocultaba pero `portada.js` igual dejaba todo `inert` esperando un clic en un
+  botón invisible → página bloqueada al recargar en la misma sesión. Ahora
+  `portada.js` hace `portada.remove(); return;` si ve `sin-portada`. Cualquier
+  cambio en la portada tiene que probarse también **recargando en la misma
+  pestaña** (segunda carga), no solo con una pestaña nueva.
+
 ## Datos pasados al JS admin (`MapaAdmin`)
 
 ```js
@@ -211,18 +323,25 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
   - **Idle**: colores base
   - **Hover** (`:hover`): mismos colores de idle, solo `scale(1.2)` más grande
   - **Seleccionado** (`.selected`): el punto que se muestra en el panel
-    ahora — todo `#FE4734` (relleno y borde) + `scale(1.2)` + animación
-    ripple (`::before`/`::after`, keyframe `onda`). Es el único estado con
-    la onda
-  - **Mismo circuito** (`.mismo-circuito`): los demás puntos del circuito
-    que está abierto en el panel — relleno `#FFD7D3`, borde 2px `#FE4734`,
-    tamaño idle. Su variante hover solo agranda, no cambia color. Se
+    ahora — todo del color principal de su circuito (relleno y borde) +
+    `scale(1.2)` + animación ripple en ese mismo color (`::before`/`::after`,
+    keyframe `onda`, con `color-mix()` y fallback rgba). Es el único estado
+    con la onda. Sin circuito, el fallback es gris oscuro `#333` (el rojo
+    `#FE4734` ya no se usa en ningún lado)
+  - **Con circuito** (`.con-circuito`, reposo): relleno claro + borde 1px del
+    color principal. Cada marcador lleva `--c-principal`/`--c-claro` inline
+    (los pone `crearIcono()` desde `MapaSonoro.circuitos`)
+  - **Circuito abierto** (`.circuito-abierto` en el contenedor de Leaflet,
+    la agrega `marcarMismoCircuito()`): los puntos que NO son del circuito
+    abierto pasan a blanco con borde oscuro (siguen siendo interactivos).
+    Los del circuito (`.mismo-circuito`) mantienen su color. Se
     marca/limpia con `marcarMismoCircuito()` / `limpiarMismoCircuito()`
     (expuestas en `window.MapaSonoroPanel`), llamadas desde
     `mapa-circuitos.js` al abrir/salir de un circuito — no al navegar
     dentro del mismo. `.selected` le gana a `.mismo-circuito` vía
     `:not(.selected)`, porque el punto activo también pertenece a su
     propio circuito y tiene ambas clases a la vez
+  - Puntos sin circuito (6 en local): quedan blancos con borde oscuro siempre
 - Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
 - Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo
@@ -230,7 +349,6 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
   tileable (`assets/paper-texture.png`, CC0, Rice Paper 2 de Subtle
   Patterns) con `background-attachment: local` — sin ese valor el fondo
   queda pegado al contenedor visible en vez de moverse con el scroll
-- Marcador activo: animación ripple con `::before`/`::after` (keyframe `onda`)
 - Click en fondo del mapa (desktop) o tecla Esc: cierra panel
 - Al seleccionar un punto arranca solo su medio (`reproducirMedio`): si tiene
   audio gana el audio, si no se activa el video. Suena un solo medio a la vez
@@ -273,14 +391,12 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
 ## Pendiente / próximas features
 
 - Loader mientras carga el mapa
-- Campo `color_circuito` (color picker) en el field group de circuitos
+- Campo `color_circuito` (color picker) en el field group de circuitos, si se
+  quiere editar la paleta desde el admin (hoy vive en código)
 - Galería de imágenes en `punto-sonoro` (hoy solo `imagen_punto`, una imagen)
 - Trazo del circuito dibujado en el mapa mientras la vista está abierta
 - Compartir circuito por URL
 - Filtros por etiquetas
-- Accesos directos a circuitos en el header — ahí vivía el toggle de
-  "Mostrar recorridos" (junto con los `L.polyline` hardcodeados que
-  dibujaba), que se sacó entero por quedar sin uso
 - Tiles del mapa público sin íconos de POI (restaurantes, comercios, etc.):
   hoy vienen "horneados" en la imagen del tile de OSM.de, no son una capa
   aparte que se pueda ocultar. Se probó Esri World Light Gray Canvas (sin
