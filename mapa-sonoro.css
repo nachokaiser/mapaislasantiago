@@ -55,6 +55,29 @@ body.mapa-page {
     font-weight: 600;
 }
 
+/* (El selector lleva .mapa-header-logo para ganarle a `.mapa-header-logo a` de
+   arriba: con solo .mapa-site-name el peso y el color no se aplicaban.)
+   Título del sitio (Figma 388:202): Alegreya Sans ExtraBold 24px, tracking
+   0.02em, #313740. En mobile (≤720px) va en 19px fijos (pedido explícito; a
+   24px no entra al lado del botón del menú) y puede partirse en dos líneas. */
+.mapa-header-logo .mapa-site-name {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    color: #313740;
+    /* Si se parte en dos líneas, que queden parejas ("El Mapa Sonoro de /
+       la Isla Santiago") y no una palabra sola. */
+    text-wrap: balance;
+}
+
+@media (min-width: 721px) {
+    .mapa-header-logo .mapa-site-name {
+        font-size: 24px;
+        line-height: normal;
+    }
+}
+
 .mapa-header-logo img {
     max-height: 36px;
     width: auto;
@@ -706,11 +729,10 @@ body.mapa-page {
 #mapa-footer {
     flex-shrink: 0;
     padding: 6px 20px;
-    background: #f8f8f8;
-    border-top: 1px solid #eee;
+    background: #2b333f;
     font-size: 13px;
     line-height: 1.4;
-    color: #666;
+    color: #fff;
     text-align: center;
 }
 
@@ -773,4 +795,83 @@ body.mapa-page {
     max-height: none;
     width: auto;
     cursor: zoom-out;
+}
+
+
+/* TOAST de bienvenida (mapa-toast.js). Fijo, centrado, 52px debajo del header
+   (Figma 388:283: 14px, borde 1px #bebebe). Entra y sale con fade; --toast-fade lo fija el JS según
+   si sale tranquilo o rápido. Invisible = no recibe clics. */
+.mapa-toast {
+    position: fixed;
+    left: 50%;
+    top: calc(var(--header-h) + 52px);
+    transform: translateX(-50%);
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    /* max-content: con left:50% el ancho disponible es solo la mitad de la
+       pantalla y el texto se partía en muchas líneas. */
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 10px;
+    border: 1px solid #bebebe;
+    border-radius: 5px;
+    background: #ececec;
+    color: #313740;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--toast-fade, 0.4s) ease, visibility 0s linear var(--toast-fade, 0.4s);
+}
+
+.mapa-toast.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity var(--toast-fade, 0.4s) ease, visibility 0s;
+}
+
+.mapa-toast-texto {
+    margin: 0;
+}
+
+/* El salto de línea del Figma es de escritorio; en pantallas angostas el texto
+   fluye solo. */
+@media (max-width: 720px) {
+    .mapa-toast-texto br {
+        display: none;
+    }
+
+    /* Más abajo que en escritorio: ahí ocupa todo el ancho y taparía los botones
+       de zoom del mapa (arriba a la izquierda). */
+    .mapa-toast {
+        top: calc(var(--header-h) + 84px);
+    }
+}
+
+.mapa-toast-cerrar {
+    flex-shrink: 0;
+    display: flex;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+}
+
+.mapa-toast-cerrar:focus-visible {
+    outline: 2px solid #313740;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mapa-toast,
+    .mapa-toast.is-visible {
+        transition: none;
+    }
 }

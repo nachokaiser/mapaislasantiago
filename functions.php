@@ -64,6 +64,7 @@ function mapa_sonoro_scripts() {
         // Tipografía de todo el mapa: Alegreya Sans
         wp_enqueue_style('mapa-fuentes', 'https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400;1,700&display=swap', [], null);
         wp_enqueue_script('mapa-nav-js', get_stylesheet_directory_uri() . '/mapa-nav.js', ['mapa-circuitos-js'], null, true);
+        wp_enqueue_script('mapa-toast-js', get_stylesheet_directory_uri() . '/mapa-toast.js', [], null, true);
         wp_enqueue_style('portada-css', get_stylesheet_directory_uri() . '/portada.css');
         wp_enqueue_script('portada-js', get_stylesheet_directory_uri() . '/portada.js', [], null, true);
 
