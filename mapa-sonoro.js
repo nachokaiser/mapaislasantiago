@@ -101,6 +101,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Cuánto de la pantalla ocupa la hoja de abajo en mobile (el CSS tiene los
+    // mismos números: 60dvh normal, 42dvh la compacta, `.sin-punto`). La compacta es la de un
+    // circuito recién abierto desde el nav, sin punto elegido: deja más mapa a
+    // la vista para que entre el circuito entero (hay circuitos de ~4 km de
+    // ancho, y con la hoja normal quedaba un tramo de ~150px de mapa).
+    const HOJA_COMPACTA = 0.42;
+
     // Límites de movimiento del mapa por defecto (los mismos de mapConfig)
     const limitesBase = L.latLngBounds(mapConfig.maxBounds);
 
@@ -127,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         map.fitBounds(bounds, {
             paddingTopLeft:     [40, 40],
-            paddingBottomRight: esDesktop ? [450 + 40, 40] : [40, window.innerHeight * 0.6 + 20],
+            paddingBottomRight: esDesktop ? [450 + 40, 40] : [40, window.innerHeight * HOJA_COMPACTA + 20],
             maxZoom:            16,
             animate:            true,
             duration:           0.6
@@ -277,6 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
         detenerVideoActivo();
         window.audioActual = null;
         panelContenido.innerHTML = '<div class="panel-cargando">Cargando…</div>';
+        panel.classList.remove('sin-punto');
         panel.classList.add('activo');
 
         try {
