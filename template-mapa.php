@@ -67,8 +67,16 @@
     </div>
 </div>
 
+<?php // Aviso de bienvenida (mapa-toast.js): se muestra una vez por sesión, ver el JS. ?>
+<div id="mapa-toast" class="mapa-toast" role="status" aria-live="polite">
+    <p class="mapa-toast-texto">Seleccioná un circuito en el menú de arriba <br>o cualquier punto en el mapa para comenzar.</p>
+    <button type="button" class="mapa-toast-cerrar" aria-label="Cerrar aviso">
+        <img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icon-cerrar.svg' ); ?>" alt="" width="24" height="24">
+    </button>
+</div>
+
 <footer id="mapa-footer">
-    <p>Hecho en comunidad y coordinado por el Club Isleños Unidos en Isla Santiago, Argentina</p>
+    <p>Hecho en comunidad. Coordinado por el Club Isleños Unidos de Isla Santiago, Argentina.</p>
 </footer>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada" hidden>

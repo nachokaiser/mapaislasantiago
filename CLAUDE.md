@@ -28,6 +28,8 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
 - `mapa-nav.js` — Nav de circuitos del header (links + menú hamburguesa).
   Depende de `mapa-circuitos.js`: al tocar un link llama a
   `MapaCircuitos.abrir(id)`
+- `mapa-toast.js` — Toast de bienvenida (una vez por sesión, ver "Header, toast
+  de bienvenida y footer")
 - `portada.php` / `portada.css` / `portada.js` — Pantalla de portada con
   collage animado (en cada carga, ver "Portada")
 - `acf-json/` — Field groups de ACF (Local JSON). Los CPT NO viven acá: se
@@ -345,6 +347,44 @@ footer están `inert`.
   otro tamaño); las `-m` son recortes propios del mobile.
 - Probar siempre con la portada **recién cargada**: el navegador de pruebas del
   editor frena las animaciones y puede tardar 20 s en mostrar el estado final.
+
+## Header, toast de bienvenida y footer
+
+Diseño de Figma `388:202`.
+
+- **Título del sitio** (`.mapa-site-name`): Alegreya Sans **ExtraBold (800)**,
+  24px en escritorio, tracking `0.02em`, color `#313740`. En ≤720px va en **19px
+  fijos** (pedido explícito) y puede partirse en dos líneas parejas
+  (`text-wrap: balance`): a 24px mide ~343px y no entra al lado del botón del
+  menú.
+- **Footer** (`#mapa-footer`): fondo `#2b333f`, texto blanco, sin borde de
+  arriba. El tamaño de letra sigue en 13px (la regla de +2px de la tipografía;
+  Figma trae 11px). Texto del Figma: "Hecho en comunidad. Coordinado por el Club
+  Isleños Unidos de Isla Santiago, Argentina." (antes decía "Hecho en comunidad
+  y coordinado por el Club Isleños Unidos en Isla Santiago, Argentina").
+- **Toast de bienvenida** (`#mapa-toast`, `mapa-toast.js`, ícono
+  `assets/icon-cerrar.svg` bajado de Figma): "Seleccioná un circuito en el menú de
+  arriba o cualquier punto en el mapa para comenzar." (sin saludo ni emoji, a
+  pedido del Figma). Fondo `#ececec`, borde 1px `#bebebe`, radio 5px, padding
+  10px, Alegreya Sans 500 14px, `position: fixed`, centrado,
+  52px debajo del header (en ≤720px, 84px: si no tapa los botones de zoom). El
+  `<br>` del texto es solo de escritorio.
+  - **Una vez por sesión:** `sessionStorage['toastBienvenidaVisto']`, que se
+    marca al mostrarse. "Sesión" = la vida de la pestaña: sobrevive a recargas,
+    se pierde al cerrar la pestaña, y una pestaña nueva es una sesión nueva. Si
+    el navegador bloquea el storage, el toast sale en cada carga.
+  - **Línea de tiempo:** aparece 0,5 s después de que se ve el mapa (la portada
+    avisa con el evento `portada:cerrada` al sacarse; si no hay portada, desde
+    la carga) con fade de 0,4 s, se queda **10 s** y sale con fade de 0,6 s.
+  - **Salida rápida** (fade de 0,2 s): tocar un punto o un circuito — se detecta
+    porque el panel (`#mapa-panel`) gana la clase `activo` (MutationObserver), así
+    no hay que cablear cada punto ni cada link — o tocar la X.
+  - Invisible no recibe clics (`visibility: hidden` + `pointer-events: none`);
+    `role="status"` + `aria-live="polite"`; sin transición con
+    `prefers-reduced-motion`.
+  - `portada.js` ahora saca la portada con `terminarSalida()`: por
+    `transitionend`, con un respaldo a los 700 ms (con "reducir movimiento" no hay
+    transición y la portada nunca se sacaba).
 
 ## Datos pasados al JS admin (`MapaAdmin`)
 

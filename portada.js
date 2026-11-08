@@ -80,8 +80,17 @@
         // se le avisa que recalcule.
         window.dispatchEvent(new Event('resize'));
 
-        portada.addEventListener('transitionend', function () {
+        // Cuando termina el fade, la portada se saca y se avisa (el toast de
+        // bienvenida arranca desde ese momento). El tiempo de respaldo cubre el
+        // caso sin transición (reducir movimiento): ahí transitionend no llega.
+        let cerrada = false;
+        function terminarSalida() {
+            if (cerrada) return;
+            cerrada = true;
             portada.remove();
-        }, { once: true });
+            document.dispatchEvent(new CustomEvent('portada:cerrada'));
+        }
+        portada.addEventListener('transitionend', terminarSalida, { once: true });
+        setTimeout(terminarSalida, 700);
     });
 })();
