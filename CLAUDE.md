@@ -308,10 +308,17 @@ footer están `inert`.
   "Ondas copy" del PSD, no el del grupo oculto "Ondas" (ese está corrido y las
   ondas salían descentradas de la isla). Si se mueve el collage en el PSD,
   releer ese centro.
-- **Botón:** tamaño y posición del PSD (391×113 / 367×121), todo en unidades
-  del escenario (`--portada-u-desktop`/`--portada-u-mobile`), así escala junto
-  con el collage y nunca se acerca más a las piezas que en el diseño. Azul
-  `#1F42AE`, Alegreya Sans.
+- **Botón:** de tamaño **estándar** (16px, padding 16px 40px, Alegreya Sans 500,
+  azul `#1F42AE`), no escala con el collage — antes copiaba el tamaño del PSD y
+  se veía muy grande. Solo su **posición** sigue al escenario (centro a 430px /
+  364px bajo el centro del lienzo, escritorio / mobile), y en escritorio está
+  subido 30px más (`- 30px` en el `top`). Va último en el DOM, así queda por
+  encima de cualquier pieza.
+- **Foco del botón:** recibe el foco por código al terminar la animación (así
+  Enter/Espacio andan de una y los lectores de pantalla lo anuncian), pero ese
+  foco **no se dibuja**. El anillo aparece solo cuando se toca Tab o una flecha
+  (`portada.js` agrega `.por-teclado` a `.portada`). No usar `:focus-visible`
+  a secas: el navegador lo muestra en un foco puesto por código.
 - **Esquinas de abajo en mobile** (`'grupo' => 'bl' | 'br'`): grabador+ondas
   y velero+barra azul van en contenedores `.portada__grupo` anclados a la
   esquina real de la pantalla. Solo se mueven hacia afuera (si sobra papel al
@@ -320,6 +327,17 @@ footer están `inert`.
 - **Accesibilidad:** el wordmark es el `<h1>` ("Canto del Río"), el subtítulo
   un `<p>` con su texto, el resto de las imágenes `aria-hidden`.
   `prefers-reduced-motion`: aparece ya armada, sin animar.
+- **Destello del papel al entrar las piezas** (corregido, PR #13): las piezas
+  arrancaban en `opacity: 0` y el navegador no pinta lo transparente, así que
+  ~15 imágenes se pintaban todas juntas en el primer cuadro de su entrada
+  (1,25 s): la pantalla se trababa, el papel de fondo se perdía un instante
+  (gris plano) y las fotos aparecían de a poco (se vio en una grabación de la
+  pantalla a 2880px). Ahora las piezas arrancan en `opacity: 0.01` con
+  `will-change: transform, opacity` (ya pintadas de antes), entran escalonadas
+  30ms (`--k`, orden de la pieza) y el papel y las ondas tienen capa propia
+  (`will-change: transform`). Si vuelve a pasar, lo siguiente es simplificar las
+  ondas (se redibujan cada cuadro). Los keyframes `portada-entra`/`portada-fade`
+  parten de 0.01, no de 0: no volver a 0.
 - **Imágenes** (`assets/portada/*.webp`, exportadas de los PSD con
   `psd-tools`): al reemplazar una, **cambiar el nombre** del archivo (los
   `<img>` no se versionan y el navegador cachea el viejo; por eso existen
@@ -376,7 +394,18 @@ MapaAdmin.puntos  // array de otros puntos (referencia visual)
     `:not(.selected)`, porque el punto activo también pertenece a su
     propio circuito y tiene ambas clases a la vez
   - Puntos sin circuito (6 en local): quedan blancos con borde oscuro siempre
-- Click en marcador: pan con offset (desktop: horizontal, mobile: vertical) + abre panel
+- Click en marcador: acomoda la vista con offset (desktop: horizontal, mobile:
+  vertical) + abre panel. **Siempre al mismo zoom** (`ZOOM_PUNTO`, hoy 16 en
+  mobile y desktop, constantes separadas en `mapa-sonoro.js`), sea por toque,
+  nav o autoplay y no importa el zoom que dejó el usuario: así el recorrido en
+  autoplay tiene una escala reconocible. `centrarConOffset()` usa `setView`
+  (0,8 s) y calcula el corrimiento en píxeles al zoom de destino. Abrir un
+  circuito desde el nav NO usa esto: encuadra el circuito entero
+  (`encuadrarPuntos`, `fitBounds` con `maxZoom` 16)
+- Conocido, aceptado: en desktop el punto seleccionado queda a ~60px del borde
+  del panel, no centrado en el espacio libre, porque Leaflet no recalcula su
+  tamaño cuando el panel se abre (no hay `invalidateSize`). Ya pasaba antes y se
+  decidió dejarlo así (se ve bien); en mobile no ocurre
 - Desktop (>720px): side panel derecho de 450px con animación ancho + fade
 - Mobile (≤720px): bottom sheet desliza desde abajo
 - Fondo de `#panel-contenido` (no de `#mapa-panel`): textura de papel
