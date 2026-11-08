@@ -33,55 +33,60 @@ $portada_escenarios = [
         'w'         => 1920,
         'h'         => 1371,
         'cx'        => 960,   // centro de las ondas
-        'cy'        => 677,
+        'cy'        => 526,
         'recorrido' => 160,   // cuánto se desplazan las piezas al entrar, en px del lienzo
         'ondas'     => [ 321, 438, 545, 690, 829, 990, 1170, 1360, 1560, 1770, 1990 ],
         'piezas'    => [
-            [ 'n' => 'isla-verde',               'x' =>  544, 'y' =>  467, 'w' => 814, 'h' => 448, 'fade' => true ],
-            [ 'n' => 'libreta',                  'x' =>  169, 'y' =>  266, 'w' => 435, 'h' => 335 ],
-            [ 'n' => 'titulo',                   'x' =>  691, 'y' =>  374, 'w' => 535, 'h' => 633, 'titulo' => true ],
-            [ 'n' => 'nene-camara',              'x' =>  204, 'y' =>  586, 'w' => 337, 'h' => 400 ],
-            [ 'n' => 'punto-azul',               'x' => 1456, 'y' =>  949, 'w' =>  12, 'h' =>  12 ],
-            [ 'n' => 'nene-celular',             'x' =>  134, 'y' =>  957, 'w' => 536, 'h' => 281 ],
-            [ 'n' => 'garabato-amarillo-arcos',  'x' =>  414, 'y' =>  900, 'w' => 146, 'h' => 139 ],
-            [ 'n' => 'garabato-naranja-rayas',   'x' =>  423, 'y' =>  622, 'w' => 102, 'h' =>  87 ],
-            [ 'n' => 'mano-grabador',            'x' => 1305, 'y' =>  212, 'w' => 353, 'h' => 352 ],
-            [ 'n' => 'garabato-naranja-ondas-1', 'x' => 1209, 'y' =>  281, 'w' => 118, 'h' => 121 ],
-            [ 'n' => 'garabato-naranja-ondas-2', 'x' => 1382, 'y' =>  141, 'w' => 104, 'h' =>  97 ],
-            [ 'n' => 'garabato-azul-barra',      'x' => 1180, 'y' => 1061, 'w' => 523, 'h' => 156 ],
-            [ 'n' => 'muelle',                   'x' => 1389, 'y' =>  466, 'w' => 538, 'h' => 313 ],
-            [ 'n' => 'garabato-amarillo-zigzag', 'x' => 1761, 'y' =>  495, 'w' => 138, 'h' =>  89 ],
-            [ 'n' => 'velero',                   'x' => 1242, 'y' =>  624, 'w' => 503, 'h' => 581 ],
-            [ 'n' => 'garabato-naranja-ovalos',  'x' =>  274, 'y' =>  218, 'w' =>  93, 'h' =>  71 ],
-            [ 'n' => 'garabato-azul-onda',       'x' =>   59, 'y' =>  893, 'w' => 146, 'h' =>  86 ],
+            [ 'n' => 'isla-verde',               'x' =>  544, 'y' =>  312, 'w' => 814, 'h' => 449, 'fade' => true ],
+            [ 'n' => 'libreta',                  'x' =>  149, 'y' =>  236, 'w' => 435, 'h' => 335 ],
+            [ 'n' => 'titulo',                   'x' =>  710, 'y' =>  293, 'w' => 492, 'h' => 470, 'titulo' => true, 'f' => 'canto-del-rio' ],
+            [ 'n' => 'nene-camara',              'x' =>  252, 'y' =>  596, 'w' => 289, 'h' => 343 ],
+            [ 'n' => 'nene-celular',             'x' =>  200, 'y' =>  927, 'w' => 440, 'h' => 230 ],
+            [ 'n' => 'garabato-amarillo-arcos',  'x' =>  430, 'y' =>  879, 'w' => 120, 'h' => 115 ],
+            [ 'n' => 'garabato-naranja-rayas',   'x' =>  440, 'y' =>  627, 'w' =>  87, 'h' =>  74 ],
+            [ 'n' => 'mano-grabador',            'x' => 1455, 'y' =>  206, 'w' => 281, 'h' => 281 ],
+            [ 'n' => 'ondas-naranjas',           'x' =>  969, 'y' =>  149, 'w' => 630, 'h' => 612 ],
+            [ 'n' => 'garabato-azul-barra',      'x' => 1378, 'y' =>  952, 'w' => 416, 'h' => 124 ],
+            [ 'n' => 'muelle',                   'x' => 1412, 'y' =>  416, 'w' => 469, 'h' => 272 ],
+            [ 'n' => 'garabato-amarillo-zigzag', 'x' => 1736, 'y' =>  502, 'w' => 120, 'h' =>  78 ],
+            [ 'n' => 'velero',                   'x' => 1427, 'y' =>  605, 'w' => 400, 'h' => 461 ],
+            [ 'n' => 'garabato-naranja-ovalos',  'x' =>  254, 'y' =>  188, 'w' =>  93, 'h' =>  71 ],
+            [ 'n' => 'garabato-azul-onda',       'x' =>  169, 'y' =>  578, 'w' => 146, 'h' =>  86 ],
+            [ 'n' => 'subtitulo',                'x' =>  714, 'y' =>  817, 'w' => 492, 'h' => 142, 'texto' => true ],
+            [ 'n' => 'subrayado',                'x' =>  848, 'y' =>  967, 'w' => 354, 'h' =>  16, 'subrayado' => true ],
         ],
     ],
     'mobile'  => [
         'w'         => 784,
         'h'         => 1371,
-        'cx'        => 390,
-        'cy'        => 666,
+        'cx'        => 392,   // centro de las ondas = centro de "Ondas copy" del PSD
+        'cy'        => 606,
         'recorrido' => 100,
         'ondas'     => [ 238, 323, 402, 507, 609, 728, 860, 1000 ],
+        // 'grupo' => 'bl' / 'br': piezas de las esquinas de abajo. Se anclan a la
+        // esquina de la pantalla (ver .portada__grupo en portada.css) para que,
+        // cuando la pantalla no tiene la proporción del PSD, queden contra la
+        // esquina y no floten hacia el botón.
         'piezas'    => [
-            [ 'n' => 'isla-verde',               'x' =>   75, 'y' =>  544, 'w' => 604, 'h' => 333, 'fade' => true ],
-            [ 'n' => 'titulo',                   'x' =>  226, 'y' =>  498, 'w' => 330, 'h' => 390, 'titulo' => true ],
-            [ 'n' => 'nene-camara',              'x' =>   21, 'y' =>  931, 'w' => 218, 'h' => 265, 'f' => 'nene-camara-m' ],
-            [ 'n' => 'garabato-naranja-rayas',   'x' =>  154, 'y' =>  947, 'w' =>  64, 'h' =>  60, 'f' => 'garabato-naranja-rayas-m' ],
-            [ 'n' => 'mano-grabador',            'x' =>  473, 'y' =>  243, 'w' => 250, 'h' => 250 ],
-            [ 'n' => 'garabato-naranja-ondas-1', 'x' =>  405, 'y' =>  292, 'w' =>  83, 'h' =>  86 ],
-            [ 'n' => 'garabato-naranja-ondas-2', 'x' =>  528, 'y' =>  193, 'w' =>  73, 'h' =>  68 ],
-            [ 'n' => 'muelle',                   'x' =>    0, 'y' =>  193, 'w' => 386, 'h' => 242, 'f' => 'muelle-m' ],
-            [ 'n' => 'garabato-amarillo-zigzag', 'x' =>  257, 'y' =>  215, 'w' => 106, 'h' =>  69 ],
-            [ 'n' => 'garabato-azul-barra',      'x' =>  506, 'y' => 1118, 'w' => 347, 'h' => 104 ],
-            [ 'n' => 'velero',                   'x' =>  548, 'y' =>  829, 'w' => 236, 'h' => 385, 'f' => 'velero-m' ],
-            [ 'n' => 'garabato-azul-onda',       'x' =>   78, 'y' =>  435, 'w' => 146, 'h' =>  86 ],
+            [ 'n' => 'isla-verde',               'x' =>   60, 'y' =>  428, 'w' => 633, 'h' => 348, 'fade' => true, 'f' => 'isla-verde' ],
+            [ 'n' => 'titulo',                   'x' =>  207, 'y' =>  419, 'w' => 370, 'h' => 353, 'titulo' => true, 'f' => 'canto-del-rio' ],
+            [ 'n' => 'nene-camara',              'x' =>  511, 'y' =>   51, 'w' => 259, 'h' => 316, 'f' => 'nene-camara-m2' ],
+            [ 'n' => 'garabato-naranja-rayas',   'x' =>  693, 'y' =>   87, 'w' =>  82, 'h' =>  70, 'f' => 'garabato-naranja-rayas-m2' ],
+            [ 'n' => 'ondas-naranjas',           'x' =>   22, 'y' => 1103, 'w' => 704, 'h' => 326, 'f' => 'ondas-naranjas-m', 'grupo' => 'bl' ],
+            [ 'n' => 'mano-grabador',            'x' =>  -26, 'y' => 1134, 'w' => 188, 'h' => 285, 'f' => 'mano-grabador-m', 'grupo' => 'bl' ],
+            [ 'n' => 'garabato-azul-onda',       'x' =>  483, 'y' =>  297, 'w' => 118, 'h' =>  70 ],
+            [ 'n' => 'garabato-azul-barra',      'x' =>  480, 'y' => 1291, 'w' => 354, 'h' => 106, 'grupo' => 'br' ],
+            [ 'n' => 'velero',                   'x' =>  522, 'y' =>  995, 'w' => 341, 'h' => 394, 'grupo' => 'br' ],
+            [ 'n' => 'muelle',                   'x' =>  -21, 'y' =>  138, 'w' => 470, 'h' => 247, 'f' => 'muelle-m2' ],
+            [ 'n' => 'garabato-amarillo-arcos',  'x' =>  224, 'y' =>   87, 'w' => 129, 'h' => 123 ],
+            [ 'n' => 'subtitulo',                'x' =>  209, 'y' =>  802, 'w' => 366, 'h' => 104, 'texto' => true, 'f' => 'subtitulo-m' ],
+            [ 'n' => 'subrayado',                'x' =>  313, 'y' =>  916, 'w' => 273, 'h' =>  12, 'subrayado' => true, 'f' => 'subrayado-m' ],
         ],
     ],
 ];
 ?>
-<div id="portada" class="portada" role="dialog" aria-modal="true" aria-label="El mapa sonoro de la Isla Santiago">
-    <img class="portada__papel" src="<?php echo esc_url( $portada_url . 'papel.webp' ); ?>" alt="" width="1920" height="1280" aria-hidden="true">
+<div id="portada" class="portada" role="dialog" aria-modal="true" aria-label="Canto del Río — Mapa Sonoro de la Isla Santiago">
+    <img class="portada__papel" src="<?php echo esc_url( $portada_url . 'papel.webp' ); ?>" alt="" width="1920" height="1280" fetchpriority="high" aria-hidden="true">
 
     <?php // El grano de las ondas va en un SVG aparte, siempre visible: un patrón dentro de un SVG con display:none no se dibuja. ?>
     <svg class="portada__defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -100,10 +105,27 @@ $portada_escenarios = [
                 <?php endforeach; ?>
             </svg>
 
-            <?php foreach ( $esc['piezas'] as $pieza ) :
-                $es_fade   = ! empty( $pieza['fade'] );
-                $es_titulo = ! empty( $pieza['titulo'] );
-                $archivo   = isset( $pieza['f'] ) ? $pieza['f'] : $pieza['n'];
+            <?php
+            $grupo_abierto = null;
+            foreach ( $esc['piezas'] as $pieza ) :
+                $es_fade      = ! empty( $pieza['fade'] );
+                $es_titulo    = ! empty( $pieza['titulo'] );
+                $es_texto     = ! empty( $pieza['texto'] );
+                $es_subrayado = ! empty( $pieza['subrayado'] );
+                $archivo      = isset( $pieza['f'] ) ? $pieza['f'] : $pieza['n'];
+                $grupo        = isset( $pieza['grupo'] ) ? $pieza['grupo'] : null;
+
+                // Las piezas de una esquina van juntas en un contenedor propio
+                // (las del mismo 'grupo' tienen que ser consecutivas).
+                if ( $grupo !== $grupo_abierto ) {
+                    if ( $grupo_abierto ) {
+                        echo '</div>';
+                    }
+                    if ( $grupo ) {
+                        echo '<div class="portada__grupo portada__grupo--' . esc_attr( $grupo ) . '">';
+                    }
+                    $grupo_abierto = $grupo;
+                }
 
                 // Vector unitario del centro de las ondas hacia la pieza: de ahí
                 // arranca, y se mueve hacia el centro hasta quedar en su lugar.
@@ -116,6 +138,10 @@ $portada_escenarios = [
                 $clases = 'portada__pieza portada__pieza--' . $pieza['n'];
                 if ( $es_titulo ) {
                     $clases .= ' portada__pieza--titulo';
+                } elseif ( $es_texto ) {
+                    $clases .= ' portada__pieza--texto';
+                } elseif ( $es_subrayado ) {
+                    $clases .= ' portada__pieza--subrayado';
                 } elseif ( $es_fade ) {
                     $clases .= ' portada__pieza--fade';
                 } else {
@@ -128,26 +154,37 @@ $portada_escenarios = [
                     round( $pieza['y'] / $esc['h'] * 100, 3 ),
                     round( $pieza['w'] / $esc['w'] * 100, 3 )
                 );
-                if ( ! $es_fade && ! $es_titulo ) {
+                if ( ! ( $es_fade || $es_titulo || $es_texto || $es_subrayado ) ) {
                     $estilo .= sprintf( '--dx:%d;--dy:%d;', $dx, $dy );
                 }
 
+                // El título y el subtítulo son texto para lectores de pantalla; el resto es decoración.
+                $alt = '';
+                if ( $es_titulo ) {
+                    $alt = 'Canto del Río';
+                } elseif ( $es_texto ) {
+                    $alt = 'Mapa Sonoro de la Isla Santiago';
+                }
+
                 // lazy: la composición que no se ve (display:none) no se descarga.
+                // La isla es lo primero que aparece y es el mismo archivo en las
+                // dos composiciones: se pide ya, con prioridad, sin esperar a que
+                // el JS la marque.
+                $carga = $es_fade ? 'fetchpriority="high"' : 'loading="lazy"';
                 $img = sprintf(
-                    '<img src="%s" alt="%s" width="%d" height="%d" loading="lazy"%s>',
+                    '<img src="%s" alt="%s" width="%d" height="%d" %s%s>',
                     esc_url( $portada_url . $archivo . '.webp' ),
-                    $es_titulo ? 'El mapa sonoro de la Isla Santiago' : '',
+                    esc_attr( $alt ),
                     $pieza['w'],
                     $pieza['h'],
-                    $es_titulo ? '' : ' aria-hidden="true"'
+                    $carga,
+                    $alt ? '' : ' aria-hidden="true"'
                 );
+                $etiqueta = $es_titulo ? 'h1' : ( $es_texto ? 'p' : 'div' );
                 ?>
-                <?php if ( $es_titulo ) : ?>
-                    <h1 class="<?php echo esc_attr( $clases ); ?>" style="<?php echo esc_attr( $estilo ); ?>"><?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput ?></h1>
-                <?php else : ?>
-                    <div class="<?php echo esc_attr( $clases ); ?>" style="<?php echo esc_attr( $estilo ); ?>"><?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
-                <?php endif; ?>
+                <<?php echo $etiqueta; ?> class="<?php echo esc_attr( $clases ); ?>" style="<?php echo esc_attr( $estilo ); ?>"><?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput ?></<?php echo $etiqueta; ?>>
             <?php endforeach; ?>
+            <?php if ( $grupo_abierto ) { echo '</div>'; } ?>
         </div>
     <?php endforeach; ?>
 
