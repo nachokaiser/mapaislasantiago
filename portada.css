@@ -224,7 +224,17 @@
     background: #183a96;
 }
 
+/* El botón recibe el foco solo, por código, al terminar la animación (así
+   Enter/Espacio funcionan de una y los lectores de pantalla lo anuncian). Ese
+   foco no se dibuja: el anillo aparece recién cuando alguien usa el teclado
+   (portada.js pone .por-teclado en la primera tecla que se toca). */
+.portada .portada__comenzar:focus,
 .portada .portada__comenzar:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.portada.por-teclado .portada__comenzar:focus-visible {
     outline: 3px solid var(--portada-azul);
     outline-offset: 4px;
 }

@@ -58,6 +58,15 @@
         boton.focus({ preventScroll: true });
     }, { once: true });
 
+    // El anillo de foco se muestra solo para quien navega con teclado: el foco
+    // que le damos al botón por código no se ve (ver el CSS).
+    document.addEventListener('keydown', function mostrarFoco(e) {
+        if (e.key === 'Tab' || e.key.indexOf('Arrow') === 0) {
+            portada.classList.add('por-teclado');
+            document.removeEventListener('keydown', mostrarFoco);
+        }
+    });
+
     // Sin animación (reducir movimiento) no hay animationend: foco directo.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         boton.focus({ preventScroll: true });
