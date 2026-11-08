@@ -4,12 +4,14 @@
      0.00s  isla verde, en fade
      0.40s  ondas, de la del centro hacia afuera, una cada 0.09s
      1.25s  piezas de alrededor: fade + desplazamiento hacia el centro
-     1.95s  título
-     2.40s  botón
+     1.95s  wordmark "Canto del Río"
+     2.10s  subtítulo "Mapa Sonoro de la Isla Santiago"
+     2.50s  subrayado de "Isla Santiago", trazándose de izquierda a derecha
+     3.00s  botón
    Solo el papel está a la vista desde el principio. */
 
 :root {
-    --portada-azul: #0d249e;
+    --portada-azul: #1f42ae;
     --portada-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
 
     /* Qué tan grande se ve cada collage: 0 = entra entero en la pantalla (sobra
@@ -28,6 +30,10 @@
         min(100vw, calc(100dvh * 784 / 1371))
         + (max(100vw, calc(100dvh * 784 / 1371)) - min(100vw, calc(100dvh * 784 / 1371))) * var(--portada-escala-mobile)
     );
+
+    /* Cuántos px de pantalla vale 1px del lienzo, en cada composición. */
+    --portada-u-desktop: calc(var(--portada-w-desktop) / 1920);
+    --portada-u-mobile: calc(var(--portada-w-mobile) / 784);
 }
 
 /* La decide un script en <head> (ya la vio en esta sesión): sin esto se vería
@@ -77,18 +83,45 @@ html.sin-portada #portada {
 .portada__escenario--desktop {
     width: var(--portada-w-desktop);
     aspect-ratio: 1920 / 1371;
-    --portada-u: calc(var(--portada-w-desktop) / 1920);
+    --portada-u: var(--portada-u-desktop);
 }
 
 .portada__escenario--mobile {
     display: none;
     width: var(--portada-w-mobile);
     aspect-ratio: 784 / 1371;
-    --portada-u: calc(var(--portada-w-mobile) / 784);
+    --portada-u: var(--portada-u-mobile);
+
+    /* Espacio de papel que queda entre el escenario y cada borde de la
+       pantalla (0 si el escenario ya los pasa). Lo usan las esquinas de
+       abajo para pegarse al borde real en vez de al del escenario. */
+    --portada-hueco-x: max(0px, calc((100vw - var(--portada-w-mobile)) / 2));
+    --portada-hueco-y: max(0px, calc((100dvh - var(--portada-w-mobile) * 1371 / 784) / 2));
 }
 
-/* Pantalla vertical (celular): se usa la composición del PSD móvil. El botón va
-   donde lo ubica ese PSD (centro a 1054px de 1371), relativo al escenario. */
+/* Piezas de las esquinas de abajo (solo móvil). Se mueven hacia afuera, nunca
+   hacia adentro: si sobra papel al costado o abajo, se pegan a la esquina de la
+   pantalla; si el escenario ya se pasa de la pantalla, quedan donde están (el
+   borde las recorta). Así nunca se acercan al botón, que va fijo respecto del
+   escenario. */
+.portada__grupo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.portada__grupo--bl {
+    transform: translate(calc(-1 * var(--portada-hueco-x)), var(--portada-hueco-y));
+}
+
+.portada__grupo--br {
+    transform: translate(var(--portada-hueco-x), var(--portada-hueco-y));
+}
+
+/* Pantalla vertical (celular): se usa la composición del PSD móvil. El botón
+   tiene el tamaño y el lugar del PSD (367×121, centro a 364px bajo el centro del
+   lienzo), todo relativo al escenario: así escala junto con las piezas y nunca
+   se acerca más a ellas que en el diseño. */
 @media (max-aspect-ratio: 1/1) {
     .portada__escenario--desktop {
         display: none;
@@ -99,9 +132,10 @@ html.sin-portada #portada {
     }
 
     html .portada .portada__comenzar {
-        bottom: auto;
-        top: calc(50% + var(--portada-w-mobile) * 0.47);
-        translate: 0 -50%;
+        top: calc(50% + 364 * var(--portada-u-mobile));
+        width: calc(367 * var(--portada-u-mobile));
+        height: calc(121 * var(--portada-u-mobile));
+        font-size: calc(51 * var(--portada-u-mobile));
     }
 }
 
@@ -145,33 +179,43 @@ html.sin-portada #portada {
 
 .portada__pieza--fade,
 .portada__pieza--entra,
-.portada__pieza--titulo {
+.portada__pieza--titulo,
+.portada__pieza--texto {
     opacity: 0;
+}
+
+/* El subrayado se "traza": arranca recortado del todo y se descubre de
+   izquierda a derecha. */
+.portada__pieza--subrayado {
+    clip-path: inset(0 100% 0 0);
 }
 
 /* Con .portada adelante para ganarle a los estilos de botón de GeneratePress. */
 .portada .portada__comenzar {
+    /* Tamaño y lugar del PSD de escritorio (391×113, centro a 430px bajo el
+       centro del lienzo), relativos al escenario. El de móvil está más arriba. */
     position: absolute;
     left: 50%;
-    bottom: clamp(16px, 4dvh, 64px);
-    transform: translateX(-50%);
-    min-width: 220px;
-    padding: 22px 40px;
+    top: calc(50% + 430 * var(--portada-u-desktop));
+    transform: translate(-50%, -50%);
+    width: calc(391 * var(--portada-u-desktop));
+    height: calc(113 * var(--portada-u-desktop));
+    padding: 0;
     border: 0;
     border-radius: 4px;
     background: var(--portada-azul);
     color: #fff;
     font: inherit;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+    font-size: calc(48 * var(--portada-u-desktop));
+    font-weight: 500;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     cursor: pointer;
     opacity: 0;
 }
 
 .portada .portada__comenzar:hover {
-    background: #0a1c7d;
+    background: #183a96;
 }
 
 .portada .portada__comenzar:focus-visible {
@@ -197,8 +241,23 @@ html.sin-portada #portada {
     animation: portada-fade 0.6s ease 1.95s both;
 }
 
+.portada.is-playing .portada__pieza--texto {
+    animation: portada-fade 0.45s ease 2.1s both;
+}
+
+.portada.is-playing .portada__pieza--subrayado {
+    animation: portada-subrayado 0.5s cubic-bezier(0.55, 0, 0.25, 1) 2.5s both;
+}
+
 .portada.is-playing .portada__comenzar {
-    animation: portada-boton 0.5s ease 2.4s both;
+    animation: portada-boton 0.5s ease 3s both;
+}
+
+/* Las piezas que no son la isla esperan, en pausa, a que su imagen esté lista
+   (portada.js les pone .is-lista). En pausa y con retraso, la animación se queda
+   en su primer cuadro (invisible). */
+.portada.is-playing .portada__pieza:not(.portada__pieza--fade):not(.is-lista) {
+    animation-play-state: paused;
 }
 
 /* La isla termina en 0.5 porque se mezcla (multiplicar) al 50% sobre el papel. */
@@ -228,7 +287,12 @@ html.sin-portada #portada {
     to   { opacity: 1; }
 }
 
-/* El botón ya está centrado con translateX: la animación lo conserva. */
+@keyframes portada-subrayado {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+}
+
+/* El botón ya está centrado con translate: la animación solo cambia la opacidad. */
 @keyframes portada-boton {
     from { opacity: 0; }
     to   { opacity: 1; }
@@ -245,8 +309,13 @@ html.sin-portada #portada {
     .portada .portada__onda,
     .portada .portada__pieza--entra,
     .portada .portada__pieza--titulo,
+    .portada .portada__pieza--texto,
     .portada .portada__comenzar {
         opacity: 1;
+    }
+
+    .portada .portada__pieza--subrayado {
+        clip-path: none;
     }
 
     .portada .portada__pieza--isla-verde {
