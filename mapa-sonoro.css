@@ -386,23 +386,13 @@ body.mapa-page {
         left: 0;
         width: 100%;
         max-height: 60vh;
-        /* dvh = alto realmente visible. En iPhone, vh es el alto SIN las barras
-           del navegador, así que 60vh tapaba ~70% de lo que se ve. */
-        max-height: 60dvh;
         border-radius: 16px 16px 0 0;
         overflow: hidden;
-        transition: bottom 0.3s ease, max-height 0.3s ease;
+        transition: bottom 0.3s ease;
     }
 
     #mapa-panel.activo {
         bottom: 0;
-    }
-
-    /* Hoja compacta: circuito abierto desde el nav, todavía sin punto elegido.
-       Deja más mapa a la vista (mapa-sonoro.js, HOJA_COMPACTA, usa el mismo 42). */
-    #mapa-panel.activo.sin-punto {
-        max-height: 42vh;
-        max-height: 42dvh;
     }
 
     #panel-contenido {

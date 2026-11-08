@@ -265,15 +265,14 @@ no lo corte, mientras el circuito está abierto se amplía con
 `setMaxBounds(limitesBase.pad(1.5))`; `restaurarLimites()` lo devuelve al
 cerrar (`salir()`).
 
-**Hoja compacta en mobile** (`.sin-punto`): al abrir un circuito desde el nav (sin
-punto elegido), la hoja de abajo mide **42dvh** en vez de 60dvh, para dejar más
-mapa a la vista: "En el río" mide ~3,8 km × 1,7 km y con la hoja normal quedaba un
-tramo de ~150px de mapa y el circuito no entraba. `abrir()` pone/saca la clase;
-`seleccionarPunto()` y `abrirPanel()` la sacan (la hoja vuelve a 60dvh, con
-transición de `max-height`). `encuadrarPuntos()` usa `HOJA_COMPACTA` (0,42) para el
-padding de abajo; si se cambia el 42 del CSS hay que cambiarlo en las dos partes.
-Las hojas usan **`dvh`** (con `vh` de respaldo): en iPhone `vh` es el alto sin las
-barras de Safari, y `60vh` tapaba ~70% de lo visible.
+**Probado y descartado — hoja compacta en mobile:** se intentó achicar la hoja de
+abajo (42dvh) mientras un circuito está abierto sin punto elegido, y pasar
+la hoja de `vh` a `dvh`, para que "En el río" (~3,8 km × 1,7 km) entrara entero en el
+mapa en iPhone. Funcionaba, pero a la persona dueña del proyecto no le gustó cómo
+quedaba la hoja ("muy baja"): se volvió a 60vh como antes (PR de revert sobre el
+#19). Si el circuito grande vuelve a no entrar en iPhone, buscar otra salida sin
+tocar la altura de la hoja (por ejemplo, permitir menos zoom mínimo mientras hay
+un circuito abierto).
 
 **Los links del nav NO se agrandaron** con el resto del texto: 16px en
 desktop, 18px en el menú hamburguesa (excepción explícita a la regla de +2px).

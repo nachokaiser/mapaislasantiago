@@ -147,8 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const punto = data.puntos.find(function (p) { return p.id === puntoId; });
         if (!punto) return;
 
-        panelApi.panel.classList.remove('sin-punto');
-
         panelApi.panelContenido.querySelectorAll('.punto-circuito-item').forEach(function (el) {
             el.classList.toggle('activo', Number(el.dataset.puntoId) === puntoId);
         });
@@ -203,11 +201,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const yaAbierto = circuitoActual === circuitoId && cache[circuitoId];
         circuitoActual = circuitoId;
         avisarCircuito(circuitoId);
-
-        // Sin punto elegido (viene del nav), la hoja de mobile va compacta para
-        // que se vea el circuito entero en el mapa; al elegir un punto vuelve al
-        // tamaño normal (ver seleccionarPunto).
-        panelApi.panel.classList.toggle('sin-punto', !puntoSeleccionadoId);
 
         // Sin punto elegido (viene del nav): el mapa se acomoda para que se vea
         // el circuito entero, no solo detrás del panel.
@@ -295,7 +288,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function salir() {
         circuitoActual = null;
         avisarCircuito(null);
-        panelApi.panel.classList.remove('sin-punto');
         panelApi.restaurarLimites();
         panelApi.limpiarMismoCircuito();
     }
