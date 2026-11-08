@@ -6,11 +6,6 @@
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>
-        // La portada se muestra una vez por sesión. Va acá, antes del primer
-        // dibujado, para que no parpadee si ya se vio.
-        try { if (sessionStorage.getItem('portadaVista')) document.documentElement.classList.add('sin-portada'); } catch (e) {}
-    </script>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class( 'mapa-page' ); ?>>

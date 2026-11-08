@@ -29,7 +29,7 @@ Mapa sonoro interactivo de la Isla Santiago Oeste (La Plata, Argentina). WordPre
   Depende de `mapa-circuitos.js`: al tocar un link llama a
   `MapaCircuitos.abrir(id)`
 - `portada.php` / `portada.css` / `portada.js` — Pantalla de portada con
-  collage animado (una vez por sesión, ver "Portada")
+  collage animado (en cada carga, ver "Portada")
 - `acf-json/` — Field groups de ACF (Local JSON). Los CPT NO viven acá: se
   crean con CPT UI y se guardan en la base de datos de cada entorno
 
@@ -280,19 +280,53 @@ título del circuito en el panel es 24px. El `<h1>` de la portada no se tocó.
 
 ## Portada
 
-Pantalla de entrada con un collage animado (versiones desktop y mobile,
-`portada.php` + `portada.css` + `portada.js`), se muestra **una vez por
-sesión** (`sessionStorage.portadaVista`). Un script inline en el `<head>` de
-`template-mapa.php` agrega la clase `sin-portada` a `<html>` antes del primer
-dibujado si ya se vio, para que no parpadee. Mientras está arriba, header,
-mapa y footer están `inert`.
+Pantalla de entrada (`portada.php` + `portada.css` + `portada.js`) que tapa el
+mapa hasta tocar COMENZAR. **Se muestra en cada carga de la página** — antes se
+mostraba una vez por sesión (`sessionStorage`), pero se sacó a pedido: no
+molesta y no había forma de volver a verla. Mientras está arriba, header, mapa y
+footer están `inert`.
 
-- ⚠️ Bug ya corregido (PR #4): si la portada ya se había visto, el CSS la
-  ocultaba pero `portada.js` igual dejaba todo `inert` esperando un clic en un
-  botón invisible → página bloqueada al recargar en la misma sesión. Ahora
-  `portada.js` hace `portada.remove(); return;` si ve `sin-portada`. Cualquier
-  cambio en la portada tiene que probarse también **recargando en la misma
-  pestaña** (segunda carga), no solo con una pestaña nueva.
+- **Composiciones:** una de escritorio (`collage-mapa-sonoro.psd`, lienzo
+  1920×1371) y una de pantallas verticales (`mobile-collage-mapa-sonoro.psd`,
+  784×1371), en `~/Documents/Mapa sonoro Isla santiago/`. El CSS elige por
+  proporción (`max-aspect-ratio: 1/1` = mobile). Cada una es un "escenario" con
+  el tamaño del lienzo, escalado con el ancho de pantalla
+  (`--portada-escala`, 0 = entra entero, 1 = cubre), y las piezas van en % con
+  los valores del PSD (array `$portada_escenarios` en `portada.php`, en el
+  orden de capas del PSD de abajo hacia arriba).
+- **Línea de tiempo** (empieza cuando JS agrega `.is-playing`): isla 0 s →
+  ondas desde 0,4 s → piezas de alrededor 1,25 s → wordmark "Canto del Río"
+  1,95 s → subtítulo 2,1 s → **subrayado de "Isla Santiago" 2,5 s (se traza de
+  izquierda a derecha con `clip-path`)** → botón 3,0 s.
+- **Carga:** `portada.js` arranca la animación apenas están decodificados el
+  papel y la isla (tope 1,5 s); las demás piezas esperan en pausa a tener su
+  imagen lista (`.is-lista`; red de seguridad a los 4 s). Esperar todas las
+  imágenes hacía arrancar la isla más de 1 s tarde. Papel e isla llevan
+  `fetchpriority="high"`; el resto `loading="lazy"` (la composición que no se
+  ve no se descarga).
+- **Centro de las ondas** (`cx`/`cy` de cada escenario): el de la capa visible
+  "Ondas copy" del PSD, no el del grupo oculto "Ondas" (ese está corrido y las
+  ondas salían descentradas de la isla). Si se mueve el collage en el PSD,
+  releer ese centro.
+- **Botón:** tamaño y posición del PSD (391×113 / 367×121), todo en unidades
+  del escenario (`--portada-u-desktop`/`--portada-u-mobile`), así escala junto
+  con el collage y nunca se acerca más a las piezas que en el diseño. Azul
+  `#1F42AE`, Alegreya Sans.
+- **Esquinas de abajo en mobile** (`'grupo' => 'bl' | 'br'`): grabador+ondas
+  y velero+barra azul van en contenedores `.portada__grupo` anclados a la
+  esquina real de la pantalla. Solo se mueven hacia afuera (si sobra papel al
+  costado/abajo se pegan a la esquina; si el escenario ya se pasa, quedan
+  donde están), nunca hacia el botón.
+- **Accesibilidad:** el wordmark es el `<h1>` ("Canto del Río"), el subtítulo
+  un `<p>` con su texto, el resto de las imágenes `aria-hidden`.
+  `prefers-reduced-motion`: aparece ya armada, sin animar.
+- **Imágenes** (`assets/portada/*.webp`, exportadas de los PSD con
+  `psd-tools`): al reemplazar una, **cambiar el nombre** del archivo (los
+  `<img>` no se versionan y el navegador cachea el viejo; por eso existen
+  `-m2`). Varias piezas se reutilizan entre escritorio y mobile (misma imagen,
+  otro tamaño); las `-m` son recortes propios del mobile.
+- Probar siempre con la portada **recién cargada**: el navegador de pruebas del
+  editor frena las animaciones y puede tardar 20 s en mostrar el estado final.
 
 ## Datos pasados al JS admin (`MapaAdmin`)
 
