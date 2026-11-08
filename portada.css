@@ -112,10 +112,9 @@
     transform: translate(var(--portada-hueco-x), var(--portada-hueco-y));
 }
 
-/* Pantalla vertical (celular): se usa la composición del PSD móvil. El botón
-   tiene el tamaño y el lugar del PSD (367×121, centro a 364px bajo el centro del
-   lienzo), todo relativo al escenario: así escala junto con las piezas y nunca
-   se acerca más a ellas que en el diseño. */
+/* Pantalla vertical (celular): se usa la composición del PSD móvil. El botón va
+   en el lugar del PSD (centro a 364px bajo el centro del lienzo), relativo al
+   escenario; su tamaño es el estándar, no escala con las piezas. */
 @media (max-aspect-ratio: 1/1) {
     .portada__escenario--desktop {
         display: none;
@@ -127,9 +126,6 @@
 
     html .portada .portada__comenzar {
         top: calc(50% + 364 * var(--portada-u-mobile));
-        width: calc(367 * var(--portada-u-mobile));
-        height: calc(121 * var(--portada-u-mobile));
-        font-size: calc(51 * var(--portada-u-mobile));
     }
 }
 
@@ -186,23 +182,23 @@
 
 /* Con .portada adelante para ganarle a los estilos de botón de GeneratePress. */
 .portada .portada__comenzar {
-    /* Tamaño y lugar del PSD de escritorio (391×113, centro a 430px bajo el
-       centro del lienzo), relativos al escenario. El de móvil está más arriba. */
+    /* Botón de tamaño estándar (16px, el que ya usa el resto del sitio); solo su
+       posición sigue al PSD (centro a 430px bajo el centro del lienzo de
+       escritorio, relativo al escenario). El de móvil va más arriba. */
     position: absolute;
     left: 50%;
-    top: calc(50% + 430 * var(--portada-u-desktop));
+    top: calc(50% + 430 * var(--portada-u-desktop) - 30px); /* -30px: subido a pedido, solo escritorio */
     transform: translate(-50%, -50%);
-    width: calc(391 * var(--portada-u-desktop));
-    height: calc(113 * var(--portada-u-desktop));
-    padding: 0;
+    padding: 16px 40px;
     border: 0;
     border-radius: 4px;
     background: var(--portada-azul);
     color: #fff;
     font: inherit;
-    font-size: calc(48 * var(--portada-u-desktop));
+    font-size: 16px;
     font-weight: 500;
-    letter-spacing: 0.02em;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
     opacity: 0;
