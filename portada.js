@@ -2,14 +2,6 @@
     const portada = document.getElementById('portada');
     if (!portada) return;
 
-    // Ya la vio en esta sesión: el CSS la oculta. Sin sacarla acá, el código de
-    // abajo igual dejaría el mapa bloqueado (inert) esperando un clic en un
-    // botón que nunca se ve.
-    if (document.documentElement.classList.contains('sin-portada')) {
-        portada.remove();
-        return;
-    }
-
     const boton = portada.querySelector('.portada__comenzar');
 
     // Mientras la portada está arriba, el mapa de atrás no recibe foco ni clicks.
@@ -72,8 +64,6 @@
     }
 
     boton.addEventListener('click', function () {
-        try { sessionStorage.setItem('portadaVista', '1'); } catch (e) {}
-
         detras.forEach(function (el) { el.inert = false; });
         portada.classList.add('is-saliendo');
 

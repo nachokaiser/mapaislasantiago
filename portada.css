@@ -36,12 +36,6 @@
     --portada-u-mobile: calc(var(--portada-w-mobile) / 784);
 }
 
-/* La decide un script en <head> (ya la vio en esta sesión): sin esto se vería
-   un destello de la portada antes de que cargue el JS. */
-html.sin-portada #portada {
-    display: none;
-}
-
 .portada {
     position: fixed;
     inset: 0;
