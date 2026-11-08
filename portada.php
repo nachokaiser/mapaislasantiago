@@ -107,6 +107,7 @@ $portada_escenarios = [
 
             <?php
             $grupo_abierto = null;
+            $orden_entrada = 0; // cada pieza que entra lo hace un poco después de la anterior
             foreach ( $esc['piezas'] as $pieza ) :
                 $es_fade      = ! empty( $pieza['fade'] );
                 $es_titulo    = ! empty( $pieza['titulo'] );
@@ -155,7 +156,7 @@ $portada_escenarios = [
                     round( $pieza['w'] / $esc['w'] * 100, 3 )
                 );
                 if ( ! ( $es_fade || $es_titulo || $es_texto || $es_subrayado ) ) {
-                    $estilo .= sprintf( '--dx:%d;--dy:%d;', $dx, $dy );
+                    $estilo .= sprintf( '--dx:%d;--dy:%d;--k:%d;', $dx, $dy, $orden_entrada++ );
                 }
 
                 // El título y el subtítulo son texto para lectores de pantalla; el resto es decoración.

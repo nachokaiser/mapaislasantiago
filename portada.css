@@ -57,6 +57,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Capa propia: el papel se pinta una sola vez y no se vuelve a dibujar cuando
+       entran las demás piezas (antes se veía un destello gris, ver abajo). */
+    will-change: transform;
 }
 
 .portada__defs {
@@ -139,6 +142,9 @@
     height: 100%;
     max-width: none;
     overflow: visible;
+    /* Capa propia: las ondas se redibujan en cada cuadro mientras se expanden, y
+       así no arrastran al papel ni a las piezas. */
+    will-change: transform;
 }
 
 .portada__onda {
@@ -167,11 +173,21 @@
     mix-blend-mode: multiply;
 }
 
-.portada__pieza--fade,
+.portada__pieza--fade {
+    opacity: 0;
+}
+
+/* Las piezas que entran después NO arrancan en opacity 0 sino en 0.01 (no se
+   ve) y cada una tiene su propia capa. Con 0 el navegador no las pinta, y todas
+   se pintaban recién en el primer cuadro de su entrada: ~15 imágenes a la vez
+   (a 1,25 s) trababan la pantalla y se veía el papel gris con huecos y las
+   piezas apareciendo de a poco. Con 0.01 ya están pintadas de antes y la entrada
+   es solo mover y aclarar. */
 .portada__pieza--entra,
 .portada__pieza--titulo,
 .portada__pieza--texto {
-    opacity: 0;
+    opacity: 0.01;
+    will-change: transform, opacity;
 }
 
 /* El subrayado se "traza": arranca recortado del todo y se descubre de
@@ -224,7 +240,8 @@
 }
 
 .portada.is-playing .portada__pieza--entra {
-    animation: portada-entra 0.9s var(--portada-ease) 1.25s both;
+    /* --k: orden de la pieza; cada una entra 30ms después de la anterior. */
+    animation: portada-entra 0.9s var(--portada-ease) calc(1.25s + var(--k, 0) * 30ms) both;
 }
 
 .portada.is-playing .portada__pieza--titulo {
@@ -263,7 +280,7 @@
 
 @keyframes portada-entra {
     from {
-        opacity: 0;
+        opacity: 0.01;
         transform: translate(calc(var(--dx) * var(--portada-u)), calc(var(--dy) * var(--portada-u)));
     }
     to {
@@ -273,7 +290,7 @@
 }
 
 @keyframes portada-fade {
-    from { opacity: 0; }
+    from { opacity: 0.01; }
     to   { opacity: 1; }
 }
 
