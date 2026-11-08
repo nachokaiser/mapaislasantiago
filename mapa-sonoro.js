@@ -70,28 +70,35 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Zoom al que se acomoda la vista cada vez que se selecciona un punto, sea
+    // con un toque, desde el nav o en el autoplay. Es siempre el mismo (no el
+    // que dejó el usuario) para que el recorrido tenga una escala reconocible.
+    // Mobile y desktop van por separado porque la pantalla es muy distinta.
+    const ZOOM_PUNTO = esMobile ? 16 : 16;
+
     function centrarConOffset(latlng) {
         const esDesktop = window.innerWidth > 720;
+        const zoom      = ZOOM_PUNTO;
+
+        // El punto no va al centro del mapa sino a la parte que el panel no
+        // tapa: corrido a la izquierda en desktop (panel a la derecha), hacia
+        // arriba en mobile (hoja abajo). El corrimiento se calcula en píxeles
+        // de pantalla, al zoom de destino.
+        const punto = map.project(latlng, zoom);
+        let centro;
 
         if (esDesktop) {
-            const punto = map.project(latlng, map.getZoom());
             const mapAncho = document.getElementById('mapa-contenedor').offsetWidth;
-            const offsetX = mapAncho * 0.10;
-            const puntoCentrado = punto.subtract([offsetX, 0]);
-            map.panTo(map.unproject(puntoCentrado, map.getZoom()), {
-                animate: true,
-                duration: 0.6
-            });
+            centro = punto.subtract([mapAncho * 0.10, 0]);
         } else {
-            const punto = map.project(latlng, map.getZoom());
             const mapAlto = document.getElementById('mapa-contenedor').offsetHeight;
-            const offsetY = mapAlto * 0.32;
-            const puntoCentrado = punto.subtract([0, -offsetY]);
-            map.panTo(map.unproject(puntoCentrado, map.getZoom()), {
-                animate: true,
-                duration: 0.6
-            });
+            centro = punto.subtract([0, -mapAlto * 0.32]);
         }
+
+        map.setView(map.unproject(centro, zoom), zoom, {
+            animate:  true,
+            duration: 0.8
+        });
     }
 
     // Límites de movimiento del mapa por defecto (los mismos de mapConfig)
