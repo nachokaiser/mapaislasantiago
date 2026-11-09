@@ -22,8 +22,9 @@ function mapa_sonoro_paleta_circuitos() {
         'el-porton-misterioso'  => [ 'principal' => '#2F6BFF', 'claro' => '#CFE0FF', 'texto' => '#2159E0' ],
         'en-el-rio'             => [ 'principal' => '#F0428A', 'claro' => '#FFD3E6', 'texto' => '#D81B72' ],
         'camino-a-la-playita'   => [ 'principal' => '#0F9E82', 'claro' => '#C4F2E6', 'texto' => '#0A7F68' ],
-        // Reserva para un sexto circuito (amarillo; el borde necesita ser oscuro):
-        // 'principal' => '#B07C00', 'claro' => '#FFEFB3', 'texto' => '#8A6100'
+        // Mostaza: un amarillo vivo no llega a 3:1 de contraste sobre blanco, por eso
+        // el principal es oscuro (3,3:1) y el texto más aún (5,5:1).
+        'club-islenos-unidos'   => [ 'principal' => '#BF8200', 'claro' => '#FFEFB3', 'texto' => '#8A6100' ],
     ];
 }
 

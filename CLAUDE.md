@@ -227,13 +227,12 @@ también el orden del nav. Cada circuito tiene tres colores:
 | `el-porton-misterioso` | `#2F6BFF` | `#CFE0FF` | `#2159E0` |
 | `en-el-rio` | `#F0428A` | `#FFD3E6` | `#D81B72` |
 | `camino-a-la-playita` | `#0F9E82` | `#C4F2E6` | `#0A7F68` |
+| `club-islenos-unidos` | `#BF8200` | `#FFEFB3` | `#8A6100` |
 
 - "En el río" (rosa) y "El portón misterioso" (azul) se **intercambiaron a
   propósito**: el azul de En el río se mimetizaba con el agua del mapa.
 - Naranja y verde están ajustados para que el borde pase 3:1 de contraste.
-- **Amarillo**: reservado para un sexto circuito, pero NO sobre blanco con el
-  tono vivo (`#F5B800` da ~1,7:1). Versión usable anotada en un comentario de
-  la paleta: `#B07C00` / `#FFEFB3` / `#8A6100`.
+- **Club Isleños Unidos** (circuito nuevo, ID 347 en producción, no está en la base local): mostaza. Un amarillo vivo (`#F5B800`) da ~1,7:1 sobre blanco, así que el principal es oscuro (`#BF8200`, 3,3:1) y el texto `#8A6100` (5,5:1). Va último en el nav.
 - Un circuito cuyo slug no esté en la paleta no tiene color (`null`): sus
   puntos quedan blancos con borde oscuro y su link de nav sin color. Si se
   suma un circuito, hay que agregarlo a la paleta (en código).
