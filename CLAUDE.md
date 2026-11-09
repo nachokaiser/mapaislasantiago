@@ -227,12 +227,12 @@ también el orden del nav. Cada circuito tiene tres colores:
 | `el-porton-misterioso` | `#2F6BFF` | `#CFE0FF` | `#2159E0` |
 | `en-el-rio` | `#F0428A` | `#FFD3E6` | `#D81B72` |
 | `camino-a-la-playita` | `#0F9E82` | `#C4F2E6` | `#0A7F68` |
-| `club-islenos-unidos` | `#D6382E` | `#FFD9D3` | `#B52A21` |
+| `club-islenos-unidos` | `#5C9A1E` | `#E3F3C8` | `#44741A` |
 
 - "En el río" (rosa) y "El portón misterioso" (azul) se **intercambiaron a
   propósito**: el azul de En el río se mimetizaba con el agua del mapa.
 - Naranja y verde están ajustados para que el borde pase 3:1 de contraste.
-- **Club Isleños Unidos** (circuito nuevo, ID 347 en producción, no está en la base local): rojo ladrillo (`#D6382E`, 4,7:1 sobre blanco; texto `#B52A21`, 6,3:1). Se evaluó una mostaza y otras opciones (verde hoja, celeste, marrón, índigo); se eligió el rojo. Queda entre el naranja y el rosa: si se los confunde en el mapa, la mostaza `#BF8200` / `#FFEFB3` / `#8A6100` era la más distinta. Va último en el nav.
+- **Club Isleños Unidos** (circuito nuevo, ID 347 en producción, no está en la base local): verde hoja (`#5C9A1E`, 3,4:1 sobre blanco; texto `#44741A`, 5,6:1). Se probaron antes una mostaza (`#BF8200`) y un rojo ladrillo (`#D6382E`): el rojo se confundía con el naranja y el rosa de los circuitos vecinos, así que se descartó. Es más claro que el verde agua de "Camino a la Playita" (`#0F9E82`), que es más azulado. Va último en el nav.
 - Un circuito cuyo slug no esté en la paleta no tiene color (`null`): sus
   puntos quedan blancos con borde oscuro y su link de nav sin color. Si se
   suma un circuito, hay que agregarlo a la paleta (en código).
